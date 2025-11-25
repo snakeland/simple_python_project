@@ -2,6 +2,8 @@
 
 <!-- CI status badge: replace OWNER/REPO with your GitHub repo -->
 [![CI](https://github.com/snakeland/simple_phython_project/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/snakeland/simple_phython_project/actions/workflows/ci.yml)
+[![workflow status](https://img.shields.io/github/actions/workflow/status/snakeland/simple_phython_project/ci.yml?branch=main&label=CI&style=flat-square)](https://github.com/snakeland/simple_phython_project/actions/workflows/ci.yml)
+[![tests](https://img.shields.io/github/actions/workflow/status/snakeland/simple_phython_project/ci.yml?branch=main&label=tests&style=flat-square)](https://github.com/snakeland/simple_phython_project/actions/workflows/ci.yml)
 <!-- Link to Copilot action log -->
 [Project / Copilot log](Copilot.md)
 
