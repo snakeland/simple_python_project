@@ -60,6 +60,12 @@ Purpose: Minimal Python package demonstrating arithmetic functions, CLI, tests, 
       - The project was added to GitHub and pushed to remote at: https://github.com/snakeland/simple_phython_project.git
       - Local `main` branch was pushed and set to track `origin/main`.
 
+   10. Fixed repository layout (moved nested folder to repo root)
+
+      - Problem: the project files were committed under a top-level folder named `simple_python_project/`, which caused GitHub to show the project folder instead of README at the repository root.
+      - Action: created a backup branch `backup/pre-move-root`, created a working branch `fix/move-project-to-root`, moved tracked files from `simple_python_project/` into the repo root (`git mv` for all tracked paths), committed the changes, pushed the fix branch and then merged the fix into `main`.
+      - Result: the repository root now contains the project files (README.md, src/, tests/, etc.) and README is visible at the repo root.
+
 ## Commands run (examples)
 
 - Create and activate venv:
