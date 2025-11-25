@@ -72,6 +72,11 @@ Purpose: Minimal Python package demonstrating arithmetic functions, CLI, tests, 
          - Deleted local leftover folder `simple_python_project/` (it contained no tracked files after the move).
          - These steps keep the working tree clean and avoid accidental re-commits of the nested copy.
 
+      12. Removed fix branch from remote and local
+
+         - Removed remote branch `origin/fix/move-project-to-root` after merging the changes into `main`.
+         - Deleted local branch `fix/move-project-to-root` to keep branches tidy.
+
 ## Commands run (examples)
 
 - Create and activate venv:
