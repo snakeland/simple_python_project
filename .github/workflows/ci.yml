@@ -30,9 +30,11 @@ jobs:
         run: |
           pytest -q
 
-      - name: Upload coverage (optional)
+      - name: Upload pytest cache (optional)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pytest-logs
-          path: .pytest_cache || .
+          name: pytest-cache
+          path: .pytest_cache
+          # don't fail the job if there were no files produced
+          if-no-files-found: warn
