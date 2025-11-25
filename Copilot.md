@@ -77,6 +77,11 @@ Purpose: Minimal Python package demonstrating arithmetic functions, CLI, tests, 
          - Removed remote branch `origin/fix/move-project-to-root` after merging the changes into `main`.
          - Deleted local branch `fix/move-project-to-root` to keep branches tidy.
 
+      13. Remove macOS artifact file
+
+         - Removed tracked `.DS_Store` from the repo and added `.DS_Store` to `.gitignore`.
+         - Committed and pushed the change to `main` to keep the repository clean of editor/OS artefacts.
+
 ## Commands run (examples)
 
 - Create and activate venv:
