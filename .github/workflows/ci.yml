@@ -25,10 +25,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e .[test]
+          python -m pip install pytest-cov
 
-      - name: Run tests
+      - name: Run tests with coverage
         run: |
-          pytest -q
+          pytest --cov=simple_calc --cov-report=term --cov-report=xml -q
 
       - name: Upload pytest cache (optional)
         if: always()
@@ -38,3 +39,10 @@ jobs:
           path: .pytest_cache
           # don't fail the job if there were no files produced
           if-no-files-found: warn
+
+      - name: Upload coverage to Codecov
+        if: always()
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage.xml
+          verbose: true
