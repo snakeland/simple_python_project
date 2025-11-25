@@ -32,6 +32,25 @@ python bin/run_calc.py add 4 7
 # prints the result of 4 + 7
 ```
 
+Makefile shortcuts
+------------------
+
+If you prefer shortcuts, the repository contains a `Makefile` with convenient targets. From the repository root copy/paste these commands (zsh):
+
+```bash
+# create a venv
+make venv
+
+# install editable package + test extras
+make install
+
+# run test suite
+make test
+
+# run the CLI (set ARGS for arguments, e.g. ARGS="add 4 7")
+make cli ARGS="add 4 7"
+```
+
 Installable package
 -------------------
 
