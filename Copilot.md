@@ -56,6 +56,13 @@ Purpose: Minimal Python package demonstrating arithmetic functions, CLI, tests, 
    - Added `.github/workflows/ci.yml` that installs the package in editable mode and runs `pytest` across Python 3.10, 3.11, and 3.12.
    - Added a CI badge placeholder to `README.md` with instructions to replace `OWNER/REPO`.
       - After pushing to GitHub I noticed the workflow failed. I inspected the workflow and made a fix to the artifact upload step so it doesn't fail when the pytest cache doesn't exist.
+         - After pushing to GitHub I noticed the workflow failed. I inspected the workflow and made a fix to the artifact upload step so it doesn't fail when the pytest cache doesn't exist.
+
+         - I also fixed two more issues that caused repeated failures:
+            * Quoted the Python versions in the matrix so `3.10` isn't parsed as a float (3.1).
+            * Fixed YAML indentation for the `strategy` matrix.
+
+         - Result: a new workflow run completed successfully (run id: 19686744653). Older runs show failures prior to the fixes (e.g. 19686225095), but the subsequent run is green.
    9. Pushed repository to GitHub
 
       - The project was added to GitHub and pushed to remote at: https://github.com/snakeland/simple_phython_project.git
