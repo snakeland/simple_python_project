@@ -66,6 +66,12 @@ Purpose: Minimal Python package demonstrating arithmetic functions, CLI, tests, 
       - Action: created a backup branch `backup/pre-move-root`, created a working branch `fix/move-project-to-root`, moved tracked files from `simple_python_project/` into the repo root (`git mv` for all tracked paths), committed the changes, pushed the fix branch and then merged the fix into `main`.
       - Result: the repository root now contains the project files (README.md, src/, tests/, etc.) and README is visible at the repo root.
 
+      11. Cleanup: removed backup branch & local nested folder
+
+         - Removed local branch `backup/pre-move-root` after validating the move.
+         - Deleted local leftover folder `simple_python_project/` (it contained no tracked files after the move).
+         - These steps keep the working tree clean and avoid accidental re-commits of the nested copy.
+
 ## Commands run (examples)
 
 - Create and activate venv:
