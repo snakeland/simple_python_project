@@ -1,5 +1,10 @@
 # Simple Python Project
 
+<!-- CI status badge: replace OWNER/REPO with your GitHub repo -->
+[![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/OWNER/REPO/actions/workflows/ci.yml)
+<!-- Link to Copilot action log -->
+[Project / Copilot log](Copilot.md)
+
 A tiny, self-contained Python project demonstrating a small package with basic arithmetic functions, a CLI entrypoint, unit tests (pytest), and a requirements.txt.
 
 ## What you'll find
