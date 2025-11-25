@@ -4,8 +4,14 @@
 Usage: python bin/run_calc.py <op> <num1> <num2>
 Where <op> is one of: add, subtract, multiply, divide
 """
+#!/usr/bin/env python3
+"""Backwards-compatible thin wrapper CLI.
+
+It delegates to the installed package entrypoint `simple_calc.cli:main` when
+the package is not executed as a script directly.
+"""
 import sys
-from simple_calc import add, subtract, multiply, divide
+from simple_calc.cli import main as _main
 
 OPS = {
     "add": add,
@@ -23,11 +29,8 @@ def usage():
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 4:
-        usage()
-        sys.exit(2)
-
-    op, a_str, b_str = sys.argv[1:4]
+    # Delegate to the package CLI implementation for consistent behavior
+    _main(sys.argv[1:])
     try:
         a = float(a_str) if ('.' in a_str or 'e' in a_str.lower()) else int(a_str)
         b = float(b_str) if ('.' in b_str or 'e' in b_str.lower()) else int(b_str)

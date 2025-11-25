@@ -1,3 +1,18 @@
+Metadata-Version: 2.4
+Name: simple-calc
+Version: 0.1.0
+Summary: Tiny arithmetic package for demos and tests
+Author-email: Your Name <you@example.com>
+License: MIT
+Project-URL: Homepage, https://example.com/simple-calc
+Keywords: calculator,demo,example
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Description-Content-Type: text/markdown
+Provides-Extra: test
+Requires-Dist: pytest>=7.0; extra == "test"
+
 # Simple Python Project
 
 A tiny, self-contained Python project demonstrating a small package with basic arithmetic functions, a CLI entrypoint, unit tests (pytest), and a requirements.txt.

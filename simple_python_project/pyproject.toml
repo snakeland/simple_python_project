@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61.0","wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "simple-calc"
+version = "0.1.0"
+description = "Tiny arithmetic package for demos and tests"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [ {name = "Your Name", email = "you@example.com"} ]
+keywords = ["calculator","demo","example"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+
+dependencies = []
+
+[project.urls]
+"Homepage" = "https://example.com/simple-calc"
+
+
+[project.optional-dependencies]
+test = ["pytest>=7.0"]
+
+[project.scripts]
+run-calc = "simple_calc.cli:main"
