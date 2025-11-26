@@ -30,29 +30,46 @@ def parse_number(s: str):
         raise ValueError("num1 and num2 must be numbers")
 
 
-def main(argv=None):
-    argv = argv if argv is not None else sys.argv[1:]
+def run(argv):
+    """Core CLI logic.
+
+    Returns an integer exit code and prints output/messages.
+    Exit codes: 0 success, 1 operation error, 2 usage/argument error.
+    """
     if len(argv) != 3:
         usage()
-        sys.exit(2)
+        return 2
 
     op, a_str, b_str = argv
-    a = parse_number(a_str)
-    b = parse_number(b_str)
+    try:
+        a = parse_number(a_str)
+        b = parse_number(b_str)
+    except ValueError as e:
+        print(f"Error: {e}")
+        return 2
 
     fn = OPS.get(op)
     if fn is None:
         print(f"Unknown operation: {op}")
         usage()
-        sys.exit(2)
+        return 2
 
     try:
         result = fn(a, b)
     except Exception as e:
         print(f"Error: {e}")
-        sys.exit(1)
+        return 1
 
     print(result)
+    return 0
+
+
+def main(argv=None, exit_process=True):
+    argv = argv if argv is not None else sys.argv[1:]
+    code = run(argv)
+    if exit_process:
+        sys.exit(code)
+    return code
 
 
 if __name__ == "__main__":
