@@ -4,6 +4,7 @@
 [![CI](https://github.com/snakeland/simple_python_project/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/snakeland/simple_python_project/actions/workflows/ci.yml)
 [![workflow status](https://img.shields.io/github/actions/workflow/status/snakeland/simple_python_project/ci.yml?branch=main&label=CI&style=flat-square)](https://github.com/snakeland/simple_python_project/actions/workflows/ci.yml)
 [![tests](https://img.shields.io/github/actions/workflow/status/snakeland/simple_python_project/ci.yml?branch=main&label=tests&style=flat-square)](https://github.com/snakeland/simple_python_project/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/snakeland/simple_python_project/branch/main/graph/badge.svg)](https://codecov.io/gh/snakeland/simple_python_project)
 <!-- Link to Copilot action log -->
 [Project / Copilot log](Copilot.md)
 
