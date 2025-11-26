@@ -2,9 +2,10 @@
 
 <!-- CI status badge: replace OWNER/REPO with your GitHub repo -->
 [![CI](https://github.com/snakeland/simple_python_project/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/snakeland/simple_python_project/actions/workflows/ci.yml)
-[![workflow status](https://img.shields.io/github/actions/workflow/status/snakeland/simple_python_project/ci.yml?branch=main&label=CI&style=flat-square)](https://github.com/snakeland/simple_python_project/actions/workflows/ci.yml)
-[![tests](https://img.shields.io/github/actions/workflow/status/snakeland/simple_python_project/ci.yml?branch=main&label=tests&style=flat-square)](https://github.com/snakeland/simple_python_project/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/snakeland/simple_python_project/branch/main/graph/badge.svg)](https://codecov.io/gh/snakeland/simple_python_project)
+<!--
+	NOTE: This repository is private. Many public badge providers (shields.io, Codecov public badges) cannot access private repo data and will show "repo or workflow not found" or "unknown" to unauthenticated visitors.
+	Keep the GitHub Actions official badge (above) if you want a quick status link for authenticated viewers. For private repos, open Actions or Codecov while signed in to see details.
+-->
 <!-- Link to Copilot action log -->
 [Project / Copilot log](Copilot.md)
 
