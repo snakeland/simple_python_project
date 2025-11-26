@@ -68,7 +68,7 @@ Purpose: Minimal Python package demonstrating arithmetic functions, CLI, tests, 
          - Added a small test badge to `README.md` (Shields.io) so the test status is visible at a glance.
    9. Pushed repository to GitHub
 
-      - The project was added to GitHub and pushed to remote at: https://github.com/snakeland/simple_phython_project.git
+      - The project was added to GitHub and pushed to remote at: https://github.com/snakeland/simple_python_project.git
       - Local `main` branch was pushed and set to track `origin/main`.
 
    10. Fixed repository layout (moved nested folder to repo root)
