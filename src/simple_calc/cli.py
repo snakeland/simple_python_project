@@ -68,9 +68,9 @@ def main(argv=None, exit_process=True):
     argv = argv if argv is not None else sys.argv[1:]
     code = run(argv)
     if exit_process:
-        sys.exit(code)
+        sys.exit(code)  # pragma: no cover
     return code
 
 
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__":  # pragma: no cover
+    main()  # pragma: no cover
