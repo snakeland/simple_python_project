@@ -1,0 +1,42 @@
+name: Build macOS Binary
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-macos-arm64:
+    runs-on: macos-latest  # Apple Silicon runner
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip wheel
+          python -m pip install -e .
+          python -m pip install pyinstaller
+      
+      - name: Build binary with PyInstaller
+        run: |
+          pyinstaller --onefile --name run-calc bin/run_calc.py
+      
+      - name: Test binary
+        run: |
+          ./dist/run-calc add 10 20
+          test $(./dist/run-calc add 10 20) -eq 30
+      
+      - name: Upload macOS arm64 binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: run-calc-macos-arm64
+          path: dist/run-calc
+          retention-days: 30
