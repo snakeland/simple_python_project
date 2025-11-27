@@ -105,12 +105,26 @@ Purpose: Minimal Python package demonstrating arithmetic functions, CLI, tests, 
    - Coverage improved from 30% → 96%.
    - Excluded trivial script guard and `sys.exit` branch with `# pragma: no cover`; total coverage now 100%.
 - Dev ergonomics:
-   - Disabled gh pager globally by exporting `GH_PAGER=cat`.
-
-Commits
+  - Disabled gh pager globally by exporting `GH_PAGER=cat`.
+- Binary distribution:
+  - Added `.github/workflows/build-macos.yml` for PyInstaller-based macOS arm64 binary builds.
+  - Workflow runs on `macos-latest` (Apple Silicon runner), builds single-file binary, tests it, uploads artifact.
+  - Automated release creation on push to main with versioning: `v{pyproject.version}-{timestamp}`.
+  - Release notes auto-generated from commits between releases.
+  - Binary attached to releases as `run-calc-macos-arm64`.
+- Cleanup:
+  - Removed `src/simple_calc.egg-info/` from repo (build artifact); added ignore patterns.
+  - Fixed `bin/run_calc.py` to delegate cleanly to package CLI with fallback to local `src/`.Commits
 - test(cli): add comprehensive CLI tests and refactor for exit codes
 - chore(cli): exclude trivial sys.exit and guard lines from coverage
 - docs(readme): consolidate badges and remove obsolete private note
+- chore: ignore packaging artifacts and remove egg-info from repo
+- fix(bin): delegate to package CLI with local src fallback
+- ci: add macOS arm64 binary build workflow
+- ci: add automated release on push to main
+- ci: fix release permissions and use semver from pyproject
+- ci: enable auto-generated release notes
+- docs: add binary download instructions to README
 
 ## Commands run (examples)
 
