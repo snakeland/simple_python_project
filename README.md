@@ -68,3 +68,25 @@ This will provide a `run-calc` command you can run from anywhere:
 run-calc add 4 7
 # prints the result of 4 + 7
 ```
+
+## Pre-built macOS binary
+
+Download the latest Apple Silicon (arm64) binary from [Releases](https://github.com/snakeland/simple_python_project/releases):
+
+```bash
+# Using GitHub CLI
+gh release download --pattern 'run-calc-macos-arm64'
+
+# Remove quarantine and make executable
+xattr -d com.apple.quarantine run-calc-macos-arm64
+chmod +x run-calc-macos-arm64
+
+# Run it
+./run-calc-macos-arm64 add 10 20
+
+# Optional: install to PATH
+sudo mv run-calc-macos-arm64 /usr/local/bin/run-calc
+run-calc multiply 6 7
+```
+
+**Note**: macOS marks downloaded files as quarantined. The `xattr -d` command removes this flag so the binary runs without Gatekeeper warnings.
