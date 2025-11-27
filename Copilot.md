@@ -93,6 +93,25 @@ Purpose: Minimal Python package demonstrating arithmetic functions, CLI, tests, 
          - Removed tracked `.DS_Store` from the repo and added `.DS_Store` to `.gitignore`.
          - Committed and pushed the change to `main` to keep the repository clean of editor/OS artefacts.
 
+## Updates — 2025-11-27
+
+- README docs:
+   - Consolidated badges to official GitHub Actions CI + Codecov coverage; removed duplicate shields and obsolete private-repo note. (commit applied to README)
+- CI and coverage:
+   - Confirmed pytest runs with coverage and Codecov upload via `codecov/codecov-action@v4` (files: coverage.xml). Matrix: ['3.10','3.11','3.12'].
+- CLI refactor and tests:
+   - Refactored `src/simple_calc/cli.py` to add `run(argv)` and make `main(exit_process=False)` testable.
+   - Added `tests/test_cli.py` covering success paths, aliases, invalid args, unknown op, non-numeric inputs, divide-by-zero, and scientific notation.
+   - Coverage improved from 30% → 96%.
+   - Excluded trivial script guard and `sys.exit` branch with `# pragma: no cover`; total coverage now 100%.
+- Dev ergonomics:
+   - Disabled gh pager globally by exporting `GH_PAGER=cat`.
+
+Commits
+- test(cli): add comprehensive CLI tests and refactor for exit codes
+- chore(cli): exclude trivial sys.exit and guard lines from coverage
+- docs(readme): consolidate badges and remove obsolete private note
+
 ## Commands run (examples)
 
 - Create and activate venv:
