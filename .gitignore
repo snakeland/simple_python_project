@@ -28,3 +28,9 @@ htmlcov/
 *.sublime-workspace
 # macOS
 .DS_Store
+
+# Packaging / build artifacts
+dist/
+build/
+*.egg-info/
+src/*.egg-info/
