@@ -10,6 +10,8 @@ on:
 jobs:
   build-macos-arm64:
     runs-on: macos-latest  # Apple Silicon runner
+    permissions:
+      contents: write  # Required to create releases
     
     steps:
       - uses: actions/checkout@v4
@@ -46,7 +48,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          VERSION="v$(date +%Y%m%d-%H%M%S)"
+          VERSION="v$(grep '^version' pyproject.toml | head -1 | cut -d'"' -f2)-$(date +%Y%m%d-%H%M%S)"
           gh release create "$VERSION" \
             --title "macOS arm64 build $VERSION" \
             --notes "Automated build from commit ${{ github.sha }}" \
