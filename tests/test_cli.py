@@ -1,7 +1,9 @@
 import re
+
 import simple_calc.cli as cli
 
 # Helper to call main without exiting the interpreter
+
 
 def invoke(args):
     return cli.main(args, exit_process=False)

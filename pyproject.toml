@@ -24,6 +24,30 @@ dependencies = []
 
 [project.optional-dependencies]
 test = ["pytest>=7.0"]
+dev = ["ruff>=0.7.0", "pre-commit>=3.0.0"]
 
 [project.scripts]
 run-calc = "simple_calc.cli:main"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "N",   # pep8-naming
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+]
+ignore = [
+    "E501",  # line too long (handled by formatter)
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

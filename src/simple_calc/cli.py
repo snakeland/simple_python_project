@@ -4,9 +4,10 @@
 Delegates to the same logic used by bin/run_calc.py so the project can be
 installed with a console script named `run-calc`.
 """
+
 import sys
 
-from .calculator import add, subtract, multiply, divide
+from .calculator import add, divide, multiply, subtract
 
 OPS = {
     "add": add,
@@ -25,9 +26,9 @@ def usage():
 
 def parse_number(s: str):
     try:
-        return float(s) if ('.' in s or 'e' in s.lower()) else int(s)
-    except ValueError:
-        raise ValueError("num1 and num2 must be numbers")
+        return float(s) if ("." in s or "e" in s.lower()) else int(s)
+    except ValueError as err:
+        raise ValueError("num1 and num2 must be numbers") from err
 
 
 def run(argv):

@@ -7,6 +7,27 @@ on:
     branches: [ main, master ]
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install ruff
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install ruff>=0.7.0
+
+      - name: Run ruff linter
+        run: ruff check src tests bin
+
+      - name: Run ruff formatter check
+        run: ruff format --check src tests bin
+
   test:
     runs-on: ubuntu-latest
     strategy:

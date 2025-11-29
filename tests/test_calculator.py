@@ -1,5 +1,6 @@
 import os
 import sys
+
 import pytest
 
 # Make the src/ directory importable so tests can import the package
@@ -8,7 +9,7 @@ SRC = os.path.abspath(os.path.join(HERE, "..", "src"))
 if SRC not in sys.path:
     sys.path.insert(0, SRC)
 
-from simple_calc.calculator import add, subtract, multiply, divide
+from simple_calc.calculator import add, divide, multiply, subtract  # noqa: E402
 
 
 def test_add():

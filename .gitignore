@@ -34,3 +34,6 @@ dist/
 build/
 *.egg-info/
 src/*.egg-info/
+
+# Planning / scratch
+ROADMAP.md

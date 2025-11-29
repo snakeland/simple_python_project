@@ -4,8 +4,9 @@
 Usage: python bin/run_calc.py <op> <num1> <num2>
 This simply forwards to `simple_calc.cli:main` so behavior matches `run-calc`.
 """
-import sys
+
 import os
+import sys
 
 try:
     from simple_calc.cli import main as _main
