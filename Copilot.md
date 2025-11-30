@@ -227,6 +227,13 @@ Purpose: Minimal Python package demonstrating arithmetic functions, CLI, tests, 
   run-calc avg 1 2 3               # → 2.0
   ```
 
+### CI/CD Improvements
+- **Codecov error handling** (ci/fix-codecov-warning):
+  - Added `fail_ci_if_error: false` to Codecov upload step
+  - Prevents CI failures when Codecov token is unavailable (e.g., fork PRs)
+  - Workflow continues successfully even if coverage upload fails
+  - Silences "Context access might be invalid" warnings
+
 ## Recent Commits (2025-11-30)
 ```
 51ae29a Merge pull request #4 (actions/upload-artifact 4→5)
