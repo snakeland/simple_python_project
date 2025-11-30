@@ -7,7 +7,7 @@ installed with a console script named `run-calc`.
 
 import sys
 
-from .calculator import add, divide, multiply, subtract
+from .calculator import add, average, divide, multiply, subtract
 
 OPS = {
     "add": add,
@@ -16,12 +16,15 @@ OPS = {
     "multiply": multiply,
     "div": divide,
     "divide": divide,
+    "average": average,
+    "avg": average,
 }
 
 
 def usage():
-    print("Usage: run-calc <op> <num1> <num2>")
-    print("ops: add, subtract, multiply (or mul), divide (or div)")
+    print("Usage: run-calc <op> <num1> [num2] [num3...]")
+    print("Binary ops: add, subtract, multiply (or mul), divide (or div)")
+    print("Variadic ops: average (or avg)")
 
 
 def parse_number(s: str):
@@ -37,14 +40,15 @@ def run(argv):
     Returns an integer exit code and prints output/messages.
     Exit codes: 0 success, 1 operation error, 2 usage/argument error.
     """
-    if len(argv) != 3:
+    if len(argv) < 2:
         usage()
         return 2
 
-    op, a_str, b_str = argv
+    op = argv[0]
+    num_strs = argv[1:]
+
     try:
-        a = parse_number(a_str)
-        b = parse_number(b_str)
+        numbers = [parse_number(s) for s in num_strs]
     except ValueError as e:
         print(f"Error: {e}")
         return 2
@@ -55,8 +59,14 @@ def run(argv):
         usage()
         return 2
 
+    # Check argument count for binary operations
+    if fn in (add, subtract, multiply, divide) and len(numbers) != 2:
+        print(f"Error: {op} requires exactly 2 numbers")
+        usage()
+        return 2
+
     try:
-        result = fn(a, b)
+        result = fn(*numbers)
     except Exception as e:
         print(f"Error: {e}")
         return 1

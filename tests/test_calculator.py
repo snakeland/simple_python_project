@@ -9,7 +9,7 @@ SRC = os.path.abspath(os.path.join(HERE, "..", "src"))
 if SRC not in sys.path:
     sys.path.insert(0, SRC)
 
-from simple_calc.calculator import add, divide, multiply, subtract  # noqa: E402
+from simple_calc.calculator import add, average, divide, multiply, subtract  # noqa: E402
 
 
 def test_add():
@@ -35,3 +35,32 @@ def test_divide():
 def test_divide_by_zero():
     with pytest.raises(ValueError):
         divide(1, 0)
+
+
+def test_average_two_numbers():
+    assert average(10, 20) == 15.0
+    assert average(1.5, 2.5) == 2.0
+
+
+def test_average_multiple_numbers():
+    assert average(1, 2, 3, 4, 5) == 3.0
+    assert average(10, 20, 30) == 20.0
+
+
+def test_average_single_number():
+    assert average(42) == 42.0
+
+
+def test_average_mixed_types():
+    assert average(1, 2.5, 3) == 2.1666666666666665
+    assert average(10, 15.0, 20) == 15.0
+
+
+def test_average_negative_numbers():
+    assert average(-10, 10) == 0.0
+    assert average(-5, -10, -15) == -10.0
+
+
+def test_average_no_numbers():
+    with pytest.raises(ValueError, match="average requires at least one number"):
+        average()
