@@ -108,10 +108,6 @@ run-calc --help
 
 ## CI/CD & Automation
 
----
-
-## CI/CD & Automation
-
 ### GitHub Actions Workflows
 
 **CI Workflow** (`.github/workflows/ci.yml`):
