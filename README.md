@@ -3,6 +3,10 @@
 <!-- Status -->
 [![CI](https://github.com/snakeland/simple_python_project/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/snakeland/simple_python_project/actions/workflows/ci.yml)
 [![Coverage](https://codecov.io/gh/snakeland/simple_python_project/branch/main/graph/badge.svg)](https://codecov.io/gh/snakeland/simple_python_project)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Release](https://img.shields.io/github/v/release/snakeland/simple_python_project)](https://github.com/snakeland/simple_python_project/releases)
 
 <!-- Link to Copilot action log -->
 [Project / Copilot log](Copilot.md)
