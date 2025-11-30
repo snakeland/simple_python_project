@@ -46,7 +46,7 @@ This is a Python calculator package demonstrating modern Python development prac
 ```bash
 make test          # Run all tests
 pytest -v          # Verbose output
-pytest --cov       # With coverage
+pytest --cov       # With coverage (requires pytest-cov: pip install pytest-cov)
 ```
 
 ## Git Workflow
@@ -139,7 +139,7 @@ gh pr create --fill
 ### Management
 - **Dependabot**: Auto-creates PRs for updates weekly (Mondays)
 - **pip**: Managed via `pyproject.toml` optional dependencies
-  - `[test]`: pytest
+  - `[test]`: pytest (add pytest-cov for coverage support)
   - `[dev]`: ruff, pre-commit
 
 ### Adding Dependencies
