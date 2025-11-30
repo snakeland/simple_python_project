@@ -8,6 +8,7 @@ version = "0.1.0"
 description = "Tiny arithmetic package for demos and tests"
 readme = "README.md"
 license = {text = "MIT"}
+requires-python = ">=3.10"
 authors = [ {name = "Your Name", email = "you@example.com"} ]
 keywords = ["calculator","demo","example"]
 classifiers = [
