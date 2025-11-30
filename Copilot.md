@@ -126,6 +126,86 @@ Purpose: Minimal Python package demonstrating arithmetic functions, CLI, tests, 
 - ci: enable auto-generated release notes
 - docs: add binary download instructions to README
 
+## Updates — 2025-11-30
+
+### Linting and Formatting (commit: dea93b3)
+- **Added ruff integration**: Unified linter and formatter replacing black + flake8 + isort
+  - Configured in `pyproject.toml` with modern Python 3.10+ settings:
+    - Line length: 100 characters
+    - Target version: py310
+    - Comprehensive lint rules: E, W, F, I, N, UP, B, C4
+    - Format settings: double quotes, space indentation
+  - Added dev dependencies: `ruff>=0.7.0`, `pre-commit>=3.0.0`
+
+- **Pre-commit hooks**: Created `.pre-commit-config.yaml`
+  - `ruff check --fix` (auto-fixes linting issues)
+  - `ruff-format` (auto-formats code)
+  - Standard hooks: trailing-whitespace, end-of-file-fixer, check-yaml, check-added-large-files
+  - Hooks installed locally via `pre-commit install`
+
+- **Makefile targets**: Added `lint`, `format`, `check` targets
+  - `make lint`: Run ruff linter with auto-fix
+  - `make format`: Run ruff formatter
+  - `make check`: Check code without auto-fix (dry-run)
+
+- **CI integration**: Added lint job to `.github/workflows/ci.yml`
+  - Runs before test job
+  - Python 3.12 on ubuntu-latest
+  - Steps: ruff check, ruff format --check
+  - Ensures code quality on every push/PR
+
+- **Code improvements applied**:
+  - Modernized type hints: `Union[int, float]` → `int | float` (PEP 604)
+  - Added exception chaining: `raise ... from err` (better error context)
+  - Fixed import ordering (isort-style alphabetical)
+  - Added `noqa: E402` for unavoidable test pattern
+
+- **Test results**: All 12 tests passing after formatting
+
+### Dependabot Configuration (commit: 3b67308)
+- **Created `.github/dependabot.yml`** for automated dependency updates
+  - **pip ecosystem**: Weekly monitoring (Mondays) of `pyproject.toml`
+    - Max 10 open PRs
+    - Labels: `dependencies`, `python`
+  - **github-actions ecosystem**: Weekly monitoring (Mondays) of workflow files
+    - Max 5 open PRs
+    - Labels: `dependencies`, `github-actions`
+  - Conventional commit format: `chore(deps):` with scope
+
+- **Repository labels created**:
+  - `dependencies` (blue #0366d6) - Pull requests that update a dependency file
+  - `github-actions` (black #000000) - Pull requests that update GitHub Actions code
+  - `python` (blue #2b67c6) - Pull requests that update Python code
+
+- **Initial Dependabot PRs**: 4 PRs created automatically
+  - #1: bump actions/checkout from 4 to 6 ✅ merged
+  - #2: bump codecov/codecov-action from 4 to 5 ✅ merged
+  - #3: bump actions/setup-python from 4 to 6 ✅ merged
+  - #4: bump actions/upload-artifact from 4 to 5 ✅ merged
+
+### Workflow Cleanup (commit: 2e4b9bc)
+- **Removed unused `master` branch** references from CI workflow
+  - Updated triggers to only use `main` branch
+  - Cleaner configuration matching repository default
+
+### Current State
+- **Coverage**: 100% (12/12 tests passing)
+- **Code quality**: Enforced via ruff + pre-commit
+- **CI/CD**: Lint → Test → Build workflows on every push
+- **Dependencies**: Auto-updated weekly via Dependabot
+- **Releases**: Automated with versioned binaries for macOS arm64
+
+## Recent Commits (2025-11-30)
+```
+51ae29a Merge pull request #4 (actions/upload-artifact 4→5)
+feec9d3 Merge pull request #3 (actions/setup-python 4→6)
+a193491 Merge pull request #2 (codecov/codecov-action 4→5)
+45a5ef8 Merge pull request #1 (actions/checkout 4→6)
+2e4b9bc chore: remove unused master branch reference from CI workflow
+3b67308 chore: add Dependabot configuration for automated dependency updates
+dea93b3 feat: add ruff linting and formatting with pre-commit hooks
+```
+
 ## Commands run (examples)
 
 - Create and activate venv:
@@ -185,9 +265,9 @@ Here are some useful follow-ups and improvements we can add when you want to exp
    - Add semantic-versioning / changelog automation (e.g., `semantic-release`, conventional commits).
 
 - Developer experience & CI
-   - Add a linting and formatting step to CI (ruff/flake8 + black) and enforce with a `pre-commit` config.
+   - ✅ ~~Add a linting and formatting step to CI (ruff/flake8 + black) and enforce with a `pre-commit` config.~~
    - Add type checking (mypy) and gate CI for type errors.
-   - Add coverage collection and a coverage badge (coveralls/Codecov or GitHub uploads) and post coverage reports.
+   - ✅ ~~Add coverage collection and a coverage badge (coveralls/Codecov or GitHub uploads) and post coverage reports.~~
    - Run tests on multiple OSes (macOS, Windows) in CI to verify cross-platform behavior.
 
 - Testing improvements
@@ -201,12 +281,10 @@ Here are some useful follow-ups and improvements we can add when you want to exp
    - Improve CLI parsing with `argparse` or `click` for richer UX and better error messages.
 
 - Project hygiene
-   - Add `pyproject` test extras for dev-dependencies and keep `requirements.txt` for simple setups.
+   - ✅ ~~Add `pyproject` test extras for dev-dependencies and keep `requirements.txt` for simple setups.~~
    - Add `tox` or `nox` for running the test matrix locally in an isolated way.
-   - Configure Dependabot or similar for automatic dependency updates.
-
-If you want any of these implemented, tell me which ones to prioritize and I’ll continue.
+   - ✅ ~~Configure Dependabot or similar for automatic dependency updates.~~
 
 ---
 
-If you'd like, I can expand the developer notes (include snippet diffs) or update the repo so it's ready for publishing (packaging metadata, version workflow, release notes, etc.).
+For detailed future enhancements, see `ROADMAP.md` (local planning document, gitignored).
