@@ -40,6 +40,10 @@ def run(argv):
     Returns an integer exit code and prints output/messages.
     Exit codes: 0 success, 1 operation error, 2 usage/argument error.
     """
+    if len(argv) < 1 or argv[0] in ("--help", "-h"):
+        usage()
+        return 0 if argv and argv[0] in ("--help", "-h") else 2
+
     if len(argv) < 2:
         usage()
         return 2

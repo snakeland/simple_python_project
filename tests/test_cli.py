@@ -93,3 +93,20 @@ def test_cli_binary_op_wrong_arg_count(capsys):
     assert code == 2
     out = capsys.readouterr().out
     assert "requires exactly 2 numbers" in out
+
+
+def test_cli_help_flag(capsys):
+    code = invoke(["--help"])
+    assert code == 0
+    out = capsys.readouterr().out
+    assert "Usage:" in out
+    assert "Binary ops:" in out
+    assert "Variadic ops:" in out
+
+
+def test_cli_help_short_flag(capsys):
+    code = invoke(["-h"])
+    assert code == 0
+    out = capsys.readouterr().out
+    assert "Usage:" in out
+    assert "Binary ops:" in out
