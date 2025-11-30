@@ -182,7 +182,7 @@ python bin/run_calc.py div 10 2
 
 ### Updating Docs
 - **README.md**: User-facing documentation, installation, usage
-- **Copilot.md**: Project log, chronological changes, commit history
+- **Copilot.md**: Project log, development decisions, and change history
 - **ROADMAP.md**: Local planning (gitignored, not committed)
 
 ### Docstrings
