@@ -228,11 +228,37 @@ Purpose: Minimal Python package demonstrating arithmetic functions, CLI, tests, 
   ```
 
 ### CI/CD Improvements
-- **Codecov error handling** (ci/fix-codecov-warning):
+- **Codecov error handling** (PR #11):
   - Added `fail_ci_if_error: false` to Codecov upload step
   - Prevents CI failures when Codecov token is unavailable (e.g., fork PRs)
   - Workflow continues successfully even if coverage upload fails
   - Silences "Context access might be invalid" warnings
+
+### CLI Improvement: Help Flag (feature/add-help-flag)
+- **Added `--help` and `-h` flags** to CLI
+  - Returns exit code 0 (success) when showing help
+  - Displays usage information, binary ops, and variadic ops
+  - Improves user experience and discoverability
+
+- **Implementation details**:
+  - Modified `run()` function to check for help flags before argument validation
+  - Differentiates between explicit help request (exit 0) and missing args (exit 2)
+  - Help flags work standalone: `run-calc --help` or `run-calc -h`
+
+- **Testing**:
+  - Added 2 new CLI tests (--help and -h flags)
+  - Coverage maintained at 100% (25 tests total, up from 23)
+  - All tests passing
+
+- **Usage**:
+  ```bash
+  run-calc --help
+  run-calc -h
+  # Both display:
+  # Usage: run-calc <op> <num1> [num2] [num3...]
+  # Binary ops: add, subtract, multiply (or mul), divide (or div)
+  # Variadic ops: average (or avg)
+  ```
 
 ## Recent Commits (2025-11-30)
 ```
