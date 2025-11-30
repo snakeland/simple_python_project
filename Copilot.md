@@ -189,11 +189,43 @@ Purpose: Minimal Python package demonstrating arithmetic functions, CLI, tests, 
   - Cleaner configuration matching repository default
 
 ### Current State
-- **Coverage**: 100% (12/12 tests passing)
+- **Coverage**: 100% (23/23 tests passing)
 - **Code quality**: Enforced via ruff + pre-commit
 - **CI/CD**: Lint → Test → Build workflows on every push
 - **Dependencies**: Auto-updated weekly via Dependabot
 - **Releases**: Automated with versioned binaries for macOS arm64
+- **Branch protection**: Main branch requires PRs with passing CI
+- **Documentation**: GitHub Copilot custom instructions added
+
+### Additional Updates (2025-11-30)
+- **README badges** (PR #5): Added Python version, ruff, license, and release badges
+- **Binary build optimization** (PR #7): Removed PR triggers, binaries only built on main
+- **GitHub Copilot instructions** (PR #8): Created comprehensive `.github/copilot-instructions.md`
+- **Branch protection**: Configured main branch to require PRs and passing CI checks
+
+### New Feature: Average Function (PR #10)
+- **Added `average()` function** with variadic arguments
+  - Signature: `average(*numbers: int | float) -> float`
+  - Calculates arithmetic mean of any number of values
+  - Error handling for empty input
+  - CLI integration with `avg` alias
+
+- **CLI enhancements**:
+  - Refactored to support both binary and variadic operations
+  - Binary ops (add, subtract, multiply, divide) require exactly 2 args
+  - Variadic ops (average) accept 1+ args
+  - Improved usage messages and error handling
+
+- **Testing**:
+  - Added 6 calculator tests (two numbers, multiple, single, mixed types, negatives, empty)
+  - Added 5 CLI tests (various arg counts, alias, error cases)
+  - Coverage maintained at 100% (23 tests total, up from 12)
+
+- **Usage examples**:
+  ```bash
+  run-calc average 10 20 30 40 50  # → 30.0
+  run-calc avg 1 2 3               # → 2.0
+  ```
 
 ## Recent Commits (2025-11-30)
 ```

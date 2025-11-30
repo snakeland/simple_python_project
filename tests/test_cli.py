@@ -58,3 +58,38 @@ def test_cli_scientific_notation(capsys):
     assert code == 0
     out = capsys.readouterr().out.strip()
     assert out == "150.0"
+
+
+def test_cli_average_two_numbers(capsys):
+    code = invoke(["average", "10", "20"])
+    assert code == 0
+    out = capsys.readouterr().out.strip()
+    assert out == "15.0"
+
+
+def test_cli_average_multiple_numbers(capsys):
+    code = invoke(["avg", "1", "2", "3", "4", "5"])
+    assert code == 0
+    out = capsys.readouterr().out.strip()
+    assert out == "3.0"
+
+
+def test_cli_average_single_number(capsys):
+    code = invoke(["average", "42"])
+    assert code == 0
+    out = capsys.readouterr().out.strip()
+    assert out == "42.0"
+
+
+def test_cli_average_no_numbers(capsys):
+    code = invoke(["average"])
+    assert code == 2
+    out = capsys.readouterr().out
+    assert "Usage:" in out
+
+
+def test_cli_binary_op_wrong_arg_count(capsys):
+    code = invoke(["add", "1", "2", "3"])
+    assert code == 2
+    out = capsys.readouterr().out
+    assert "requires exactly 2 numbers" in out
