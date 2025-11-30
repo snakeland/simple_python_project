@@ -185,6 +185,44 @@ python bin/run_calc.py div 10 2
 - **Copilot.md**: Project log, development decisions, and change history
 - **ROADMAP.md**: Local planning (gitignored, not committed)
 
+### Documentation Requirements for PRs
+**IMPORTANT**: Every PR that adds features, changes behavior, or updates workflows MUST include:
+
+1. **Update `Copilot.md`** with:
+   - Description of what changed
+   - Rationale for the change
+   - Code examples or usage patterns
+   - Test coverage information
+   - Commit references or PR numbers
+
+2. **Update README.md** if:
+   - New user-facing features added
+   - CLI commands changed
+   - Installation steps modified
+   - Usage examples need updating
+
+3. **Commit documentation updates** in the same PR as code changes:
+   ```bash
+   # After implementing feature
+   git add src/ tests/
+   git commit -m "feat: add new feature"
+
+   # Update documentation
+   git add Copilot.md README.md
+   git commit -m "docs: update Copilot.md and README with new feature"
+
+   # Push together
+   git push
+   ```
+
+### Documentation Checklist
+Before creating a PR, verify:
+- ✅ `Copilot.md` updated with changes under appropriate date section
+- ✅ README updated if user-facing changes exist
+- ✅ Code examples in docs tested and verified
+- ✅ New features mentioned in PR description
+- ✅ Coverage percentage updated if tests added
+
 ### Docstrings
 Use Google-style docstrings:
 ```python
