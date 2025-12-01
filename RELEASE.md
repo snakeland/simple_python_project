@@ -12,25 +12,41 @@ We use **Semantic Versioning** (SemVer): `MAJOR.MINOR.PATCH`
 
 ## Automated Releases
 
-Releases are **fully automated** using `python-semantic-release` based on conventional commits.
+Releases are **semi-automated** using `python-semantic-release` based on conventional commits. The process creates a release PR that requires manual review and approval before the release is finalized.
 
 ### How It Works
 
-1. **Commit with conventional format** to `main` branch:
-   ```bash
-   feat: add new operation     # Triggers MINOR version bump
-   fix: correct calculation    # Triggers PATCH version bump
-   docs: update README         # Triggers PATCH version bump
-   ```
+The release process has two main stages:
 
-2. **Semantic Release workflow** automatically:
-   - Analyzes commits since last release
-   - Determines version bump (major/minor/patch)
-   - Updates `version` in `pyproject.toml`
-   - Updates `CHANGELOG.md`
+#### Stage 1: Release PR Creation (Automated)
+
+When you **commit with conventional format** to `main` branch:
+```bash
+feat: add new operation     # Triggers MINOR version bump
+fix: correct calculation    # Triggers PATCH version bump
+docs: update README         # Triggers PATCH version bump
+```
+
+The **Semantic Release workflow** automatically:
+- Analyzes commits since last release
+- Determines version bump (major/minor/patch)
+- Updates `version` in `pyproject.toml`
+- Updates `CHANGELOG.md`
+- Creates a release PR (e.g., `chore(release): 0.3.0`)
+
+#### Stage 2: Release Finalization (Manual Review Required)
+
+1. **Review the release PR** created by the workflow:
+   - Verify the version bump is correct (check `pyproject.toml`)
+   - Review the CHANGELOG.md updates for accuracy
+   - Ensure all changes are properly categorized
+   - Check that breaking changes are clearly marked
+
+2. **Merge the release PR** to trigger finalization:
+   - The `finalize-release` job automatically runs
    - Creates git tag (e.g., `v0.3.0`)
    - Pushes tag to GitHub
-   - Creates GitHub release
+   - Creates GitHub release with changelog
 
 3. **Build workflow** automatically:
    - Builds macOS arm64 binary
@@ -100,9 +116,13 @@ Adds pow operation to calculator with CLI alias.
 Supports both integer and float exponents."
 
 # This will trigger:
-# - Version bump: 0.2.0 → 0.3.0
-# - CHANGELOG update with "Added" section
-# - GitHub release v0.3.0
+# - Semantic Release workflow creates a PR titled "chore(release): 0.3.0"
+# - The PR contains:
+#   - Version bump: 0.2.0 → 0.3.0 in pyproject.toml
+#   - CHANGELOG update with "Added" section
+# - After PR is reviewed and merged:
+#   - GitHub release v0.3.0 is created
+#   - macOS binary is built and attached
 ```
 
 ### Fixing a bug
@@ -113,9 +133,13 @@ Previously average([0, 0, 0]) would crash.
 Now returns 0.0 as expected."
 
 # This will trigger:
-# - Version bump: 0.2.0 → 0.2.1
-# - CHANGELOG update with "Fixed" section
-# - GitHub release v0.2.1
+# - Semantic Release workflow creates a PR titled "chore(release): 0.2.1"
+# - The PR contains:
+#   - Version bump: 0.2.0 → 0.2.1 in pyproject.toml
+#   - CHANGELOG update with "Fixed" section
+# - After PR is reviewed and merged:
+#   - GitHub release v0.2.1 is created
+#   - macOS binary is built and attached
 ```
 
 ### Documentation only (still creates patch release)
@@ -123,9 +147,13 @@ Now returns 0.0 as expected."
 git commit -m "docs: add installation instructions to README"
 
 # This will trigger:
-# - Version bump: 0.2.0 → 0.2.1
-# - CHANGELOG update
-# - GitHub release v0.2.1
+# - Semantic Release workflow creates a PR titled "chore(release): 0.2.1"
+# - The PR contains:
+#   - Version bump: 0.2.0 → 0.2.1 in pyproject.toml
+#   - CHANGELOG update
+# - After PR is reviewed and merged:
+#   - GitHub release v0.2.1 is created
+#   - macOS binary is built and attached
 ```
 
 ## Skipping Releases
@@ -146,14 +174,22 @@ Note: The following commit types **do** trigger patch releases in this project:
 To avoid triggering a release for these commit types, add `[skip ci]` to your commit message.
 ## Troubleshooting
 
-### Release didn't trigger
+### Release PR not created
 - Check that commit is on `main` branch
 - Verify commit message follows conventional format
 - Check GitHub Actions workflow run for errors
+- Ensure no previous release PR is already open
+
+### Release PR created but no release after merge
+- Check that the PR title starts with `chore(release):`
+- Verify the `finalize-release` job ran successfully
+- Check GitHub Actions workflow logs for errors
 
 ### Wrong version bump
-- Ensure commit type is correct (`feat:` vs `fix:`)
-- For breaking changes, add `BREAKING CHANGE:` footer or `!` after type
+- Review the release PR before merging
+- Check that commit types are correct (`feat:` vs `fix:`)
+- For breaking changes, ensure `BREAKING CHANGE:` footer or `!` after type
+- Close the PR without merging and fix the original commits if needed
 
 ### Need to undo a release
 ```bash
