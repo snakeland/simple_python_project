@@ -39,7 +39,7 @@ jobs:
         run: |
           # Extract the section for this version from CHANGELOG.md
           VERSION="${{ steps.get_version.outputs.VERSION }}"
-          awk "/## \[${VERSION}\]/,/## \[/" CHANGELOG.md | sed '$d' > release_notes.md
+          awk "/## \[${VERSION}\]/,/^## \[/ {if (/^## \[/ && !found) {found=1; next} if (/^## \[/ && found) exit; if (found) print}" CHANGELOG.md > release_notes.md
           cat release_notes.md
 
       - name: Create GitHub Release
