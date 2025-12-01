@@ -72,6 +72,21 @@ jobs:
           echo "tag=$TAG" >> $GITHUB_OUTPUT
           echo "version=${TAG#v}" >> $GITHUB_OUTPUT
 
+      - name: Checkout code at tag
+        run: |
+          git checkout ${{ steps.get_tag.outputs.tag }}
+
+      - name: Ensure new release was created
+        id: check_new_release
+        run: |
+          # Get the commit hash for the tag
+          TAG_COMMIT=$(git rev-list -n 1 ${{ steps.get_tag.outputs.tag }})
+          # Get the commit hash for HEAD
+          HEAD_COMMIT=$(git rev-parse HEAD)
+          if [ "$TAG_COMMIT" != "$HEAD_COMMIT" ]; then
+            echo "No new release was created in this run. Skipping binary build."
+            exit 1
+          fi
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
