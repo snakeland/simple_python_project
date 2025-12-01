@@ -79,7 +79,7 @@ jobs:
 
           # Now run semantic-release ON the release branch to create the version commit
           # This commit will be on the release branch, not main
-          semantic-release version --commit --changelog --no-push --no-tag
+          semantic-release version --commit --changelog --no-push --no-tag --branch "${BRANCH}"
 
           # Push the release branch with the version commit
           git push origin "${BRANCH}"
