@@ -60,7 +60,7 @@ jobs:
             echo "No release needed (no relevant commits since last release)"
           fi
 
-      - name: Update version files and CHANGELOG
+      - name: Create release branch and PR
         if: steps.semantic.outputs.release_needed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -68,7 +68,16 @@ jobs:
           VERSION=${{ steps.semantic.outputs.next_version }}
           BRANCH="release/${VERSION}"
 
-          # Create and checkout the release branch first
+          # Check if branch exists remotely and delete it (for reruns)
+          git push origin --delete "${BRANCH}" 2>/dev/null || true
+
+          # Create and checkout the release branch first (before making changes)
+          git checkout -b "${BRANCH}"
+
+          # Now create the version commit on the release branch
+          semantic-release version --commit --tag --changelog --no-push
+
+          # Push the release branch
           git push origin "${BRANCH}"
 
           # Create PR
@@ -91,10 +100,8 @@ jobs:
             --base main \
             --head "${BRANCH}"
 
-      - name: Comment on PR with next steps
+      - name: Log success message
         if: steps.semantic.outputs.release_needed == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "✅ Release PR created successfully!"
           echo "👉 Review and merge the PR to complete the release"
