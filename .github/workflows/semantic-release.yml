@@ -74,13 +74,14 @@ jobs:
             git push origin --delete "${BRANCH}" 2>/dev/null || true
           fi
 
-          # Create the version commit on main branch first (no tag - that happens in finalize-release)
-          semantic-release version --commit --changelog --no-push --no-tag
-
-          # Push the version commit to main before creating the release branch
-          git push origin main
-          # Now create and push the release branch with the version commit
+          # Create release branch from current main (without the version commit yet)
           git checkout -b "${BRANCH}"
+
+          # Now run semantic-release ON the release branch to create the version commit
+          # This commit will be on the release branch, not main
+          semantic-release version --commit --changelog --no-push --no-tag --branch "${BRANCH}"
+
+          # Push the release branch with the version commit
           git push origin "${BRANCH}"
 
           # Create PR
