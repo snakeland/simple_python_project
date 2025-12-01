@@ -68,13 +68,14 @@ jobs:
           VERSION=${{ steps.semantic.outputs.next_version }}
           BRANCH="release/${VERSION}"
 
-          # Check if branch exists remotely and delete it (for reruns)
+          # Clean up any existing branch (local and remote) for reruns
+          git branch -D "${BRANCH}" 2>/dev/null || true
           if git ls-remote --heads origin "${BRANCH}" | grep -q "${BRANCH}"; then
-            git push origin --delete "${BRANCH}"
+            git push origin --delete "${BRANCH}" 2>/dev/null || true
           fi
 
-          # Create and checkout the release branch first (before making changes)
-          git checkout -b "${BRANCH}"
+          # Create and checkout the release branch (reset if exists)
+          git checkout -B "${BRANCH}"
 
           # Now create the version commit on the release branch (no tag - that happens in finalize-release)
           semantic-release version --commit --changelog --no-push --no-tag
