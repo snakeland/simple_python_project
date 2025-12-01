@@ -128,8 +128,7 @@ jobs:
           echo "Commit message: ${COMMIT_MSG}"
           
           # Check if the commit message follows the expected pattern: chore(release): X.Y.Z
-          if [[ ! "${COMMIT_MSG}" =~ ^chore\(release\):\ [0-9]+\.[0-9]+\.[0-9]+$ ]] && \
-             [[ ! "${COMMIT_MSG}" =~ ^chore\(release\):\ [0-9]+\.[0-9]+\.[0-9]+[[:space:]] ]]; then
+          if [[ ! "${COMMIT_MSG}" =~ ^chore\(release\):\ [0-9]+\.[0-9]+\.[0-9]+($|[[:space:]]) ]]; then
             echo "❌ Error: Commit message does not match expected release format 'chore(release): X.Y.Z'"
             echo "   Got: ${COMMIT_MSG}"
             exit 1
@@ -143,6 +142,12 @@ jobs:
           fi
           
           VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+          
+          if [ -z "${VERSION}" ]; then
+            echo "❌ Error: Could not extract version from pyproject.toml"
+            exit 1
+          fi
+          
           echo "Version from pyproject.toml: ${VERSION}"
           
           if [[ ! "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
@@ -167,7 +172,7 @@ jobs:
           echo "✅ CHANGELOG contains entry for version ${VERSION}"
           
           # 4. Verify the version in commit message matches pyproject.toml
-          COMMIT_VERSION=$(echo "${COMMIT_MSG}" | sed -n 's/^chore(release): \([0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/p')
+          COMMIT_VERSION=$(echo "${COMMIT_MSG}" | sed -n 's/^chore(release): \([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*/\1/p')
           if [ "${COMMIT_VERSION}" != "${VERSION}" ]; then
             echo "❌ Error: Version mismatch between commit message and pyproject.toml"
             echo "   Commit message version: ${COMMIT_VERSION}"
