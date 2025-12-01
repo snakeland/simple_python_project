@@ -12,13 +12,13 @@ Development log and changelog for the simple_python_project. Documents key decis
 - Full CI/CD automation (GitHub Actions, Dependabot, binary builds)
 - Professional packaging (pyproject.toml, console script entry point)
 
-## Current Status (2025-11-30)
+## Current Status (2025-12-01)
 
 - **Tests**: 25/25 passing, 100% coverage maintained
 - **Python versions**: 3.10, 3.11, 3.12 (CI matrix)
 - **Code quality**: ruff + pre-commit hooks enforced
 - **Branch protection**: Main branch requires PRs with passing CI
-- **Automation**: Dependabot for dependencies, automated releases with binaries
+- **Automation**: Dependabot for dependencies, PR-based semantic releases with binaries
 
 ---
 
@@ -118,6 +118,22 @@ run-calc --help
   - Codecov upload: `fail_ci_if_error: false` (PR #11 - handles fork PRs gracefully)
 - **Status**: Required checks for PR merges
 
+**Semantic Release Workflow** (`.github/workflows/semantic-release.yml`):
+- **Triggers**: Push to main
+- **Strategy**: PR-based releases (respects branch protection)
+- **Jobs**:
+  - `release`: Determines next version, creates release PR with updated CHANGELOG and version
+  - `finalize-release`: Runs when release PR is merged, creates tag and GitHub release
+  - `build-binary`: Builds macOS arm64 binary after release finalization
+- **Workflow pattern**:
+  1. Push to main → semantic-release determines if release needed
+  2. If needed, creates PR with version bump and CHANGELOG
+  3. Review and merge release PR → triggers finalization
+  4. Finalization creates tag, GitHub release, and builds binary
+- **Branch protection compliance**: Uses PRs instead of direct pushes to main
+- **Rationale**: Original workflow pushed directly to main, violating branch protection rules. New workflow creates reviewable release PRs while maintaining full automation.
+- **Reference**: PR #16, commit 3208e74
+
 **Build Workflow** (`.github/workflows/build-macos.yml`):
 - **Triggers**: Push to main only (optimized in PR #7)
 - **Platform**: macOS arm64 (Apple Silicon)
@@ -145,6 +161,23 @@ run-calc --help
 ---
 
 ## Changelog
+
+### 2025-12-01
+
+**PR #16: Semantic Release Branch Protection Fix**
+- Modified semantic-release workflow to work with branch protection rules
+- **Change**: Switched from direct push to PR-based release workflow
+- **Workflow pattern**:
+  - `release` job: Determines next version → creates release PR with CHANGELOG and version bump
+  - `finalize-release` job: Runs when release PR is merged → creates tag and GitHub release
+  - `build-binary` job: Builds macOS arm64 binary after release finalization
+- **Rationale**: Original workflow violated branch protection by pushing directly to main. New workflow creates reviewable release PRs while maintaining automation.
+- **Benefits**: 
+  - Respects branch protection rules (no direct pushes to main)
+  - Maintains full automation (no manual steps required)
+  - Allows review of release changes before finalization
+  - Properly sequences tag creation, release, and binary build
+- **Reference**: Commit 3208e74
 
 ### 2025-11-30
 
