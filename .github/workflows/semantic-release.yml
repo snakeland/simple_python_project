@@ -65,21 +65,10 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Update files locally (version, CHANGELOG)
-          semantic-release version --commit --tag --changelog --no-push
-
-      - name: Create Release Pull Request
-        if: steps.semantic.outputs.release_needed == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
           VERSION=${{ steps.semantic.outputs.next_version }}
           BRANCH="release/${VERSION}"
 
-          # Create a new branch for the release
-          git checkout -b "${BRANCH}"
-
-          # Push the branch
+          # Create and checkout the release branch first
           git push origin "${BRANCH}"
 
           # Create PR
