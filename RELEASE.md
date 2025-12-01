@@ -138,11 +138,12 @@ git commit -m "chore: update development notes
 [skip ci]"
 ```
 
-Or use commit types that don't trigger releases:
+Note: The following commit types **do** trigger patch releases in this project:
 - `chore:` - Maintenance tasks
 - `style:` - Code formatting (no logic changes)
 - `build:` - Build system changes
 
+To avoid triggering a release for these commit types, add `[skip ci]` to your commit message.
 ## Troubleshooting
 
 ### Release didn't trigger
