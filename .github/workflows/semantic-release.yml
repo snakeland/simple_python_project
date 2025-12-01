@@ -74,13 +74,13 @@ jobs:
             git push origin --delete "${BRANCH}" 2>/dev/null || true
           fi
 
-          # Create and checkout the release branch (reset if exists)
-          git checkout -B "${BRANCH}"
-
-          # Now create the version commit on the release branch (no tag - that happens in finalize-release)
+          # Create the version commit on main branch first (no tag - that happens in finalize-release)
           semantic-release version --commit --changelog --no-push --no-tag
 
-          # Push the release branch
+          # Push the version commit to main before creating the release branch
+          git push origin main
+          # Now create and push the release branch with the version commit
+          git checkout -b "${BRANCH}"
           git push origin "${BRANCH}"
 
           # Create PR
@@ -131,12 +131,12 @@ jobs:
         id: validate
         run: |
           echo "::group::Validating release prerequisites"
-          
+
           # 1. Verify commit came from a release branch merge
           # Extract the branch name from the commit message or ref
           COMMIT_MSG="${{ github.event.head_commit.message }}"
           echo "Commit message: ${COMMIT_MSG}"
-          
+
           # Check if the commit message follows the expected pattern: chore(release): X.Y.Z
           if [[ ! "${COMMIT_MSG}" =~ ^chore\(release\):\ [0-9]+\.[0-9]+\.[0-9]+($|[[:space:]]) ]]; then
             echo "❌ Error: Commit message does not match expected release format 'chore(release): X.Y.Z'"
@@ -144,35 +144,35 @@ jobs:
             exit 1
           fi
           echo "✅ Commit message matches expected release format"
-          
+
           # 2. Validate version in pyproject.toml matches expected semver format
           if [ ! -f "pyproject.toml" ]; then
             echo "❌ Error: pyproject.toml not found"
             exit 1
           fi
-          
+
           VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
-          
+
           if [ -z "${VERSION}" ]; then
             echo "❌ Error: Could not extract version from pyproject.toml"
             exit 1
           fi
-          
+
           echo "Version from pyproject.toml: ${VERSION}"
-          
+
           if [[ ! "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "❌ Error: Version in pyproject.toml does not match semver format (X.Y.Z)"
             echo "   Got: ${VERSION}"
             exit 1
           fi
           echo "✅ Version in pyproject.toml matches semver format"
-          
+
           # 3. Verify CHANGELOG entry exists for this version
           if [ ! -f "CHANGELOG.md" ]; then
             echo "❌ Error: CHANGELOG.md not found"
             exit 1
           fi
-          
+
           # Check if CHANGELOG contains an entry for this version
           if ! grep -q "^## \[${VERSION}\]" CHANGELOG.md; then
             echo "❌ Error: No CHANGELOG entry found for version ${VERSION}"
@@ -180,7 +180,7 @@ jobs:
             exit 1
           fi
           echo "✅ CHANGELOG contains entry for version ${VERSION}"
-          
+
           # 4. Verify the version in commit message matches pyproject.toml
           COMMIT_VERSION=$(echo "${COMMIT_MSG}" | sed -n 's/^chore(release): \([0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/p')
           if [ "${COMMIT_VERSION}" != "${VERSION}" ]; then
@@ -190,10 +190,10 @@ jobs:
             exit 1
           fi
           echo "✅ Version in commit message matches pyproject.toml"
-          
+
           echo "::endgroup::"
           echo "✅ All release prerequisites validated successfully"
-          
+
           # Export version for later steps
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
