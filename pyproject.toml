@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "simple-calc"
-version = "0.1.0"
+version = "0.2.0"
 description = "Tiny arithmetic package for demos and tests"
 readme = "README.md"
 license = {text = "MIT"}
@@ -25,7 +25,7 @@ dependencies = []
 
 [project.optional-dependencies]
 test = ["pytest>=7.0"]
-dev = ["ruff>=0.7.0", "pre-commit>=3.0.0"]
+dev = ["ruff>=0.7.0", "pre-commit>=3.0.0", "python-semantic-release>=9.0.0"]
 
 [project.scripts]
 run-calc = "simple_calc.cli:main"
@@ -52,3 +52,37 @@ ignore = [
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
+
+[tool.semantic_release]
+version_toml = ["pyproject.toml:project.version"]
+branch = "main"
+upload_to_vcs_release = true
+build_command = "pip install build && python -m build"
+commit_message = "chore(release): {version}"
+
+[tool.semantic_release.branches.main]
+match = "main"
+prerelease = false
+
+[tool.semantic_release.changelog]
+changelog_file = "CHANGELOG.md"
+exclude_commit_patterns = [
+    "^chore\\(release\\):",
+    "^Merge pull request",
+]
+
+[tool.semantic_release.commit_parser_options]
+allowed_tags = [
+    "feat",
+    "fix",
+    "docs",
+    "style",
+    "refactor",
+    "perf",
+    "test",
+    "build",
+    "ci",
+    "chore",
+]
+minor_tags = ["feat"]
+patch_tags = ["fix", "perf", "docs", "style", "refactor", "test", "build", "ci", "chore"]
