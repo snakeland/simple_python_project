@@ -14,8 +14,12 @@ jobs:
   release:
     name: Semantic Release
     runs-on: ubuntu-latest
-    # Only run on direct pushes to main (not on PR merges that don't change version-worthy code)
-    if: ${{ !contains(github.event.head_commit.message, 'chore(release):') }}
+    outputs:
+      release_needed: ${{ steps.semantic.outputs.release_needed }}
+      next_version: ${{ steps.semantic.outputs.next_version }}
+    # Skip if this is a release PR merge (we'll handle that separately)
+    # Skip if commit message already contains chore(release):
+    if: ${{ !startsWith(github.event.head_commit.message, 'chore(release):') }}
 
     steps:
       - name: Checkout code
@@ -39,24 +43,135 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Run Semantic Release
+      - name: Run Semantic Release (determine version)
+        id: semantic
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          semantic-release version --commit --tag --changelog --push
+          # Determine the next version without making changes
+          NEXT_VERSION=$(semantic-release version --print 2>/dev/null || echo "")
 
-      - name: Publish release
+          if [ -n "$NEXT_VERSION" ]; then
+            echo "next_version=${NEXT_VERSION}" >> $GITHUB_OUTPUT
+            echo "release_needed=true" >> $GITHUB_OUTPUT
+            echo "Next version will be: ${NEXT_VERSION}"
+          else
+            echo "release_needed=false" >> $GITHUB_OUTPUT
+            echo "No release needed (no relevant commits since last release)"
+          fi
+
+      - name: Update version files and CHANGELOG
+        if: steps.semantic.outputs.release_needed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          semantic-release publish
+          # Update files locally (version, CHANGELOG)
+          semantic-release version --commit --tag --changelog --no-push
+
+      - name: Create Release Pull Request
+        if: steps.semantic.outputs.release_needed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=${{ steps.semantic.outputs.next_version }}
+          BRANCH="release/${VERSION}"
+
+          # Create a new branch for the release
+          git checkout -b "${BRANCH}"
+
+          # Push the branch
+          git push origin "${BRANCH}"
+
+          # Create PR
+          gh pr create \
+            --title "chore(release): ${VERSION}" \
+            --body "Automated release PR for version ${VERSION}
+
+          This PR was automatically created by the semantic-release workflow.
+
+          ## Changes
+          - Version bump to ${VERSION}
+          - Updated CHANGELOG.md
+          - Updated pyproject.toml
+
+          Once merged, the release workflow will automatically:
+          - Create a GitHub release with tag v${VERSION}
+          - Build and attach macOS binary
+
+          **Please review and merge to complete the release.**" \
+            --base main \
+            --head "${BRANCH}"
+
+      - name: Comment on PR with next steps
+        if: steps.semantic.outputs.release_needed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "✅ Release PR created successfully!"
+          echo "👉 Review and merge the PR to complete the release"
+
+  finalize-release:
+    name: Finalize Release (after PR merge)
+    runs-on: ubuntu-latest
+    # Only run when a release PR is merged to main
+    if: startsWith(github.event.head_commit.message, 'chore(release):')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Extract version and create tag
+        id: create_tag
+        run: |
+          # Extract version from pyproject.toml
+          VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+          TAG="v${VERSION}"
+
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+
+          # Create and push the tag
+          git tag -a "${TAG}" -m "Release ${TAG}"
+          git push origin "${TAG}"
+
+          echo "✅ Created and pushed tag: ${TAG}"
+
+      - name: Extract changelog for this version
+        id: changelog
+        run: |
+          VERSION=${{ steps.create_tag.outputs.version }}
+
+          # Extract the changelog section for this version
+          CHANGELOG_SECTION=$(awk "/^## \[${VERSION}\]/,/^## \[/ {if (/^## \[${VERSION}\]/) p=1; if (p && /^## \[/ && !/^## \[${VERSION}\]/) exit; if (p) print}" CHANGELOG.md)
+
+          # Save to file for upload
+          echo "${CHANGELOG_SECTION}" > release_notes.md
+          cat release_notes.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.create_tag.outputs.tag }}
+          name: Release ${{ steps.create_tag.outputs.tag }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-binary:
     name: Build macOS Binary
-    needs: release
+    needs: finalize-release
     runs-on: macos-latest
-    # Only run if a new release was created
-    if: needs.release.result == 'success'
+    if: startsWith(github.event.head_commit.message, 'chore(release):')
 
     steps:
       - name: Checkout code
