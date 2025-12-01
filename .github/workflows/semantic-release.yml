@@ -69,13 +69,15 @@ jobs:
           BRANCH="release/${VERSION}"
 
           # Check if branch exists remotely and delete it (for reruns)
-          git push origin --delete "${BRANCH}" 2>/dev/null || true
+          if git ls-remote --heads origin "${BRANCH}" | grep -q "${BRANCH}"; then
+            git push origin --delete "${BRANCH}"
+          fi
 
           # Create and checkout the release branch first (before making changes)
           git checkout -b "${BRANCH}"
 
-          # Now create the version commit on the release branch
-          semantic-release version --commit --tag --changelog --no-push
+          # Now create the version commit on the release branch (no tag - that happens in finalize-release)
+          semantic-release version --commit --changelog --no-push --no-tag
 
           # Push the release branch
           git push origin "${BRANCH}"
