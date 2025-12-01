@@ -77,6 +77,8 @@ jobs:
           # Create the version commit on main branch first (no tag - that happens in finalize-release)
           semantic-release version --commit --changelog --no-push --no-tag
 
+          # Push the version commit to main before creating the release branch
+          git push origin main
           # Now create and push the release branch with the version commit
           git checkout -b "${BRANCH}"
           git push origin "${BRANCH}"
