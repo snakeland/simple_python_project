@@ -142,21 +142,14 @@ jobs:
             --base main \
             --head "${BRANCH}")
 
-          # Configure PR for squash merge with proper commit message
+          # Extract PR number and add label
           PR_NUMBER=$(echo "$PR_URL" | grep -oE '[0-9]+$')
           gh pr edit "$PR_NUMBER" \
             --add-label "release" 2>/dev/null || echo "ℹ️  Note: 'release' label not found (skipped)"
 
-          # Set squash merge commit message to match the PR title
-          gh api \
-            --method PATCH \
-            -H "Accept: application/vnd.github+json" \
-            "/repos/${{ github.repository }}/pulls/${PR_NUMBER}" \
-            -f merge_commit_title="chore(release): ${VERSION}" \
-            -f merge_commit_message="Release ${VERSION}" || echo "ℹ️  Note: Could not set merge commit message"
-
           echo "✅ Pull request created: release/${VERSION} → main"
-          echo "✅ PR configured for squash merge with commit message: chore(release): ${VERSION}"
+          echo "✅ PR title set to: chore(release): ${VERSION}"
+          echo "✅ Repository squash merge enabled - commit will trigger finalize workflow"
 
       - name: Summary
         if: steps.version.outputs.release_needed == 'true'
