@@ -111,7 +111,7 @@ jobs:
           CHANGELOG_SECTION=$(awk "/^## \[${VERSION}\]/,/^## \[/ {if (/^## \[${VERSION}\]/) p=1; if (p && /^## \[/ && !/^## \[${VERSION}\]/) exit; if (p) print}" CHANGELOG.md || echo "See CHANGELOG.md for details")
 
           # Create PR from release branch to main
-          gh pr create \
+          PR_URL=$(gh pr create \
             --title "chore(release): ${VERSION}" \
             --body "## 🚀 Release ${VERSION}
 
@@ -140,12 +140,23 @@ jobs:
           **Triggered by:** @${{ github.actor }}
           **Release type:** ${{ github.event.inputs.release-type }}" \
             --base main \
-            --head "${BRANCH}"
+            --head "${BRANCH}")
 
-          # Try to add label if it exists (non-fatal)
-          gh pr edit "${BRANCH}" --add-label "release" 2>/dev/null || echo "ℹ️  Note: 'release' label not found (skipped)"
+          # Configure PR for squash merge with proper commit message
+          PR_NUMBER=$(echo "$PR_URL" | grep -oE '[0-9]+$')
+          gh pr edit "$PR_NUMBER" \
+            --add-label "release" 2>/dev/null || echo "ℹ️  Note: 'release' label not found (skipped)"
+
+          # Set squash merge commit message to match the PR title
+          gh api \
+            --method PATCH \
+            -H "Accept: application/vnd.github+json" \
+            "/repos/${{ github.repository }}/pulls/${PR_NUMBER}" \
+            -f merge_commit_title="chore(release): ${VERSION}" \
+            -f merge_commit_message="Release ${VERSION}" || echo "ℹ️  Note: Could not set merge commit message"
 
           echo "✅ Pull request created: release/${VERSION} → main"
+          echo "✅ PR configured for squash merge with commit message: chore(release): ${VERSION}"
 
       - name: Summary
         if: steps.version.outputs.release_needed == 'true'
