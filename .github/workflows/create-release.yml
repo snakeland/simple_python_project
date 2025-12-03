@@ -86,13 +86,17 @@ jobs:
           # Create release branch from develop
           git checkout -b "${BRANCH}"
 
-          # Run semantic-release to create version commit
+          # Run semantic-release to update files (but don't commit yet)
           # It will update pyproject.toml, CHANGELOG.md, etc.
           if [ "${{ github.event.inputs.release-type }}" == "auto" ]; then
-            semantic-release version --commit --changelog --no-push --no-tag
+            semantic-release version --changelog --no-push --no-tag --no-commit --skip-build
           else
-            semantic-release version --${{ github.event.inputs.release-type }} --commit --changelog --no-push --no-tag
+            semantic-release version --${{ github.event.inputs.release-type }} --changelog --no-push --no-tag --no-commit --skip-build
           fi
+
+          # Manually commit the changes
+          git add -A
+          git commit -m "chore(release): ${VERSION}"
 
           # Push the release branch
           git push origin "${BRANCH}"
