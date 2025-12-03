@@ -91,7 +91,7 @@ jobs:
           sed -i "s/^version = .*/version = \"${NEW_VERSION}\"/" pyproject.toml
 
           # Generate changelog using semantic-release
-          semantic-release changelog --unreleased
+          semantic-release changelog
 
           # Manually commit the changes
           git add -A
