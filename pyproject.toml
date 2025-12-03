@@ -71,6 +71,10 @@ prerelease = false
 match = "develop"
 prerelease = false
 
+[tool.semantic_release.branches.release]
+match = "release/*"
+prerelease = false
+
 [tool.semantic_release.changelog]
 changelog_file = "CHANGELOG.md"
 exclude_commit_patterns = [
