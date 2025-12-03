@@ -12,18 +12,75 @@ Development log and changelog for the simple_python_project. Documents key decis
 - Full CI/CD automation (GitHub Actions, Dependabot, binary builds)
 - Professional packaging (pyproject.toml, console script entry point)
 
-## Current Status (2025-12-01)
+## Current Status (2025-12-03)
 
 - **Tests**: 25/25 passing, 100% coverage maintained
 - **Python versions**: 3.10, 3.11, 3.12 (CI matrix)
 - **Code quality**: ruff + pre-commit hooks enforced
-- **Branch protection**: Main and develop branches require PRs with passing CI
-- **Automation**: Dependabot for dependencies, manual Git Flow releases with automated finalization
-- **Workflow**: Git Flow (develop → release/X.Y.Z → main) with manual release triggering
+- **Branch protection**: Main branch requires PRs with passing CI
+- **Workflow**: Git Flow (develop → release/X.Y.Z → main)
+- **Releases**: Manual trigger from develop, automated finalization on merge
+- **Automation**:
+  - Dependabot for dependencies
+  - Auto-configured squash merge for releases
+  - Automatic tag, GitHub release, and binary builds
+  - Auto-merge back to develop after release
 
 ---
 
 ## Recent Changes
+
+### 2025-12-03: Release Workflow Refinements
+
+**Updates to Git Flow Implementation**:
+
+1. **Squash Merge Automation** (commit 1739761):
+   - Release PRs now auto-configured for squash merge
+   - Merge commit message automatically set to `chore(release): X.Y.Z`
+   - Ensures finalize-release workflow triggers correctly
+   - Keeps clean single-commit history on main per release
+
+2. **Preview Release Command** (commits 3e987f7, 74b1bda):
+   - Added `make preview-release` command for local release preview
+   - Shows all commits since last release grouped by type
+   - Displays current version and calculated next version
+   - Recommends MINOR or PATCH bump based on commit analysis
+   - Helps decide what release type to trigger
+
+3. **Semantic Release Configuration** (commit eeb318f):
+   - Fixed semantic-release to work with develop branch
+   - Added `[tool.semantic_release.branches.develop]` configuration
+   - Allows version analysis when running from develop
+
+4. **Build Workflow Optimization** (earlier commit):
+   - Binary builds now only run on release merges
+   - Checks for `chore(release):` in commit message
+   - Prevents unnecessary builds on non-release main commits
+
+5. **Documentation Updates**:
+   - Added mermaid gitGraph diagram to `RELEASE.md`
+   - Updated project structure in `copilot-instructions.md`
+   - Completed file listing with all workflows
+
+6. **Branch Cleanup**:
+   - Deleted all merged feature/fix/release branches
+   - Only `main` and `develop` branches remain
+   - Cleaner repository structure
+
+**Workflow Improvements**:
+- ✅ Release label now optional (non-fatal if missing)
+- ✅ CI runs on develop pushes (allows direct work without feature branches)
+- ✅ Binary builds only on releases (not every main push)
+- ✅ Automatic squash merge configuration for release PRs
+
+**Files modified**:
+- Updated: `.github/workflows/create-release.yml` (squash merge config)
+- Updated: `.github/workflows/finalize-release.yml` (trigger on squash commits)
+- Updated: `.github/workflows/build-macos.yml` (limit to releases)
+- Updated: `Makefile` (preview-release command)
+- Updated: `pyproject.toml` (semantic-release develop branch)
+
+---
 
 ### 2025-12-01: Git Flow Workflow Implementation
 
