@@ -37,8 +37,15 @@ clean:
 	rm -rf $(VENV) build dist *.egg-info .pytest_cache
 
 preview-release:
-	@echo "=== Commits since last release ==="
-	@LAST_TAG=$$(git describe --tags --abbrev=0 2>/dev/null); \
+	@echo "=== Release Preview ==="
+	@echo ""
+	@CURRENT_VERSION=$$(grep '^version = ' pyproject.toml | cut -d '"' -f 2); \
+	echo "Current version: $$CURRENT_VERSION"; \
+	echo ""; \
+	LAST_TAG=$$(git describe --tags --abbrev=0 2>/dev/null); \
+	echo "Last release tag: $$LAST_TAG"; \
+	echo ""; \
+	echo "=== Commits since last release ==="; \
 	git log $$LAST_TAG..HEAD --oneline; \
 	echo ""; \
 	echo "=== Commit Type Analysis ==="; \
@@ -67,10 +74,20 @@ preview-release:
 		git log $$LAST_TAG..HEAD --oneline | grep '^[a-f0-9]* ci' | sed 's/^/  - /'; \
 	fi; \
 	echo ""; \
+	echo "=== Version Recommendation ==="; \
+	MAJOR=$$(echo $$CURRENT_VERSION | cut -d. -f1); \
+	MINOR=$$(echo $$CURRENT_VERSION | cut -d. -f2); \
+	PATCH=$$(echo $$CURRENT_VERSION | cut -d. -f3); \
 	if [ "$$FEAT_COUNT" -gt 0 ]; then \
-		echo "→ Suggested release: MINOR (new features)"; \
+		NEXT_VERSION="$$MAJOR.$$((MINOR + 1)).0"; \
+		echo "Suggested bump: MINOR (new features)"; \
+		echo "Next version: $$NEXT_VERSION"; \
 	elif [ "$$FIX_COUNT" -gt 0 ]; then \
-		echo "→ Suggested release: PATCH (bug fixes)"; \
+		NEXT_VERSION="$$MAJOR.$$MINOR.$$((PATCH + 1))"; \
+		echo "Suggested bump: PATCH (bug fixes)"; \
+		echo "Next version: $$NEXT_VERSION"; \
 	else \
-		echo "→ Suggested release: PATCH (other changes)"; \
+		NEXT_VERSION="$$MAJOR.$$MINOR.$$((PATCH + 1))"; \
+		echo "Suggested bump: PATCH (other changes)"; \
+		echo "Next version: $$NEXT_VERSION"; \
 	fi
