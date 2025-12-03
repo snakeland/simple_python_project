@@ -25,13 +25,28 @@ We use a simplified Git Flow model with two main branches:
 
 ### Workflow Diagram
 
+```mermaid
+gitGraph
+    commit id: "Initial"
+    branch develop
+    checkout develop
+    commit id: "feat: feature 1"
+    commit id: "fix: bug fix"
+    branch release/0.3.0
+    checkout release/0.3.0
+    commit id: "chore: bump v0.3.0"
+    checkout main
+    merge release/0.3.0 tag: "v0.3.0"
+    checkout develop
+    merge main id: "sync from main"
+    commit id: "feat: feature 2"
 ```
-develop ──┬──> feature branches ──> PR ──> develop
-          │
-          └──> (manual trigger) ──> release/X.Y.Z ──> PR ──> main
-                                                              │
-                                                              └──> auto-merge ──> develop
-```
+
+**Flow:**
+1. **Develop** → Work directly or via feature branches → merge to `develop`
+2. **Trigger Release** → Manual workflow creates `release/X.Y.Z` from `develop`
+3. **Release PR** → `release/X.Y.Z` → `main` (review and merge)
+4. **Auto-finalize** → Creates tag, GitHub release, binary, merges back to `develop`
 
 ## Versioning Strategy
 

@@ -35,3 +35,59 @@ check:
 clean:
 	@echo "Cleaning common artifacts"
 	rm -rf $(VENV) build dist *.egg-info .pytest_cache
+
+preview-release:
+	@echo "=== Release Preview ==="
+	@echo ""
+	@CURRENT_VERSION=$$(grep '^version = ' pyproject.toml | cut -d '"' -f 2); \
+	echo "Current version: $$CURRENT_VERSION"; \
+	echo ""; \
+	LAST_TAG=$$(git describe --tags --abbrev=0 2>/dev/null); \
+	echo "Last release tag: $$LAST_TAG"; \
+	echo ""; \
+	echo "=== Commits since last release ==="; \
+	git log $$LAST_TAG..HEAD --oneline; \
+	echo ""; \
+	echo "=== Commit Type Analysis ==="; \
+	echo ""; \
+	FEAT_COUNT=$$(git log $$LAST_TAG..HEAD --oneline | grep '^[a-f0-9]* feat' | wc -l | tr -d ' '); \
+	FIX_COUNT=$$(git log $$LAST_TAG..HEAD --oneline | grep '^[a-f0-9]* fix' | wc -l | tr -d ' '); \
+	DOCS_COUNT=$$(git log $$LAST_TAG..HEAD --oneline | grep '^[a-f0-9]* docs' | wc -l | tr -d ' '); \
+	CI_COUNT=$$(git log $$LAST_TAG..HEAD --oneline | grep '^[a-f0-9]* ci' | wc -l | tr -d ' '); \
+	echo "Features (feat:): $$FEAT_COUNT"; \
+	if [ "$$FEAT_COUNT" -gt 0 ]; then \
+		git log $$LAST_TAG..HEAD --oneline | grep '^[a-f0-9]* feat' | sed 's/^/  - /'; \
+	fi; \
+	echo ""; \
+	echo "Fixes (fix:): $$FIX_COUNT"; \
+	if [ "$$FIX_COUNT" -gt 0 ]; then \
+		git log $$LAST_TAG..HEAD --oneline | grep '^[a-f0-9]* fix' | sed 's/^/  - /'; \
+	fi; \
+	echo ""; \
+	echo "Docs (docs:): $$DOCS_COUNT"; \
+	if [ "$$DOCS_COUNT" -gt 0 ]; then \
+		git log $$LAST_TAG..HEAD --oneline | grep '^[a-f0-9]* docs' | sed 's/^/  - /'; \
+	fi; \
+	echo ""; \
+	echo "CI (ci:): $$CI_COUNT"; \
+	if [ "$$CI_COUNT" -gt 0 ]; then \
+		git log $$LAST_TAG..HEAD --oneline | grep '^[a-f0-9]* ci' | sed 's/^/  - /'; \
+	fi; \
+	echo ""; \
+	echo "=== Version Recommendation ==="; \
+	MAJOR=$$(echo $$CURRENT_VERSION | cut -d. -f1); \
+	MINOR=$$(echo $$CURRENT_VERSION | cut -d. -f2); \
+	PATCH=$$(echo $$CURRENT_VERSION | cut -d. -f3); \
+	if [ "$$FEAT_COUNT" -gt 0 ]; then \
+		NEXT_VERSION="$$MAJOR.$$((MINOR + 1)).0"; \
+		echo "Suggested bump: MINOR (new features)"; \
+		echo "Next version: $$NEXT_VERSION"; \
+	elif [ "$$FIX_COUNT" -gt 0 ]; then \
+		NEXT_VERSION="$$MAJOR.$$MINOR.$$((PATCH + 1))"; \
+		echo "Suggested bump: PATCH (bug fixes)"; \
+		echo "Next version: $$NEXT_VERSION"; \
+	else \
+		NEXT_VERSION="$$MAJOR.$$MINOR.$$((PATCH + 1))"; \
+		echo "Suggested bump: PATCH (other changes)"; \
+		echo "Next version: $$NEXT_VERSION"; \
+	fi

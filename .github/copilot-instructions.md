@@ -95,12 +95,25 @@ gh pr create --fill
 ├── tests/                # Test suite
 │   ├── test_calculator.py
 │   └── test_cli.py
-├── bin/run_calc.py       # Standalone wrapper
+├── bin/
+│   └── run_calc.py       # Standalone wrapper
 ├── .github/
 │   ├── workflows/        # CI/CD pipelines
+│   │   ├── ci.yml
+│   │   ├── create-release.yml
+│   │   ├── finalize-release.yml
+│   │   └── build-macos.yml
+│   ├── copilot-instructions.md  # Copilot configuration
 │   └── dependabot.yml    # Dependency automation
 ├── pyproject.toml        # Project metadata & config
-└── Makefile              # Common tasks
+├── requirements.txt      # Runtime dependencies
+├── Makefile              # Common tasks
+├── README.md             # User documentation
+├── RELEASE.md            # Release process guide
+├── Copilot.md            # Project development log
+├── CHANGELOG.md          # Version history
+├── .gitignore            # Git ignore patterns
+└── .pre-commit-config.yaml  # Pre-commit hooks
 ```
 
 ## Adding New Features
