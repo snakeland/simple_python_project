@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2025-12-03
+
+### Added
+- feat: implement custom changelog generation from git commits
+
+### Fixed
+- fix: use sed instead of awk for changelog extraction in PR description
+- fix: checkout release branch before extracting changelog for PR description
+- fix: simplify git log grep patterns for better compatibility
+- fix: improve AWK script to properly replace [Unreleased] section in changelog
+- fix: remove invalid --unreleased flag from semantic-release changelog
+- fix: use Linux-compatible sed syntax in create-release workflow
+- fix: manually update version and use semantic-release changelog command
+- fix: use --no-commit and manually commit in create-release workflow
+- fix: add release branch configuration to semantic-release
+- fix: configure semantic-release to stay in 0.x versions
+- fix: prevent duplicate releases, attach binary to existing release
+- fix: simplify release PR creation, rely on repository squash merge settings
+
+### Changed
+- chore: merge release 1.0.0 back to develop
+- chore: merge release 0.2.0 back to develop
+
 ## [1.0.0] - 2025-12-03
 
 ### Added
