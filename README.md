@@ -94,3 +94,52 @@ run-calc multiply 6 7
 ```
 
 **Note**: macOS marks downloaded files as quarantined. The `xattr -d` command removes this flag so the binary runs without Gatekeeper warnings.
+
+## Contributing
+
+This project uses a **Git Flow** workflow with separate development and production branches:
+
+- **`develop`** - main development branch (all feature work happens here)
+- **`main`** - production releases only (protected, release PRs only)
+- **`release/X.Y.Z`** - temporary release branches (created by workflow, merged to main)
+
+### Development workflow
+
+1. **Create feature branch from develop**:
+   ```bash
+   git checkout develop
+   git pull
+   git checkout -b feature/your-feature-name
+   ```
+
+2. **Make changes using conventional commits**:
+   ```bash
+   git commit -m "feat: add new calculator function"
+   git commit -m "fix: correct edge case in divide"
+   git commit -m "docs: update README examples"
+   ```
+
+3. **Create PR to develop** (not main):
+   - All feature PRs must target `develop`
+   - CI runs on both branches (lint + tests on Python 3.10, 3.11, 3.12)
+   - PRs require passing CI before merge
+
+4. **Release process** (maintainers only):
+   - Trigger manual release workflow from GitHub Actions
+   - Workflow creates release PR from develop to main
+   - After merge, automated workflow creates tag, GitHub release, and binary
+
+See [RELEASE.md](RELEASE.md) for detailed release process documentation.
+
+### Commit message format
+
+We use [Conventional Commits](https://www.conventionalcommits.org/) for automatic semantic versioning:
+
+- `feat:` - new feature (MINOR version bump: 0.2.0 → 0.3.0)
+- `fix:` - bug fix (PATCH version bump: 0.2.0 → 0.2.1)
+- `docs:` - documentation only
+- `ci:` - CI/CD changes
+- `test:` - test updates
+- `chore:` - maintenance tasks
+
+Add `!` or `BREAKING CHANGE:` for breaking changes (MAJOR version bump: 0.2.0 → 1.0.0).
