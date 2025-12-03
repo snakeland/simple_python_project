@@ -64,6 +64,10 @@ commit_message = "chore(release): {version}"
 match = "main"
 prerelease = false
 
+[tool.semantic_release.branches.develop]
+match = "develop"
+prerelease = false
+
 [tool.semantic_release.changelog]
 changelog_file = "CHANGELOG.md"
 exclude_commit_patterns = [
