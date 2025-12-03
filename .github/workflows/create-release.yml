@@ -1,0 +1,169 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release-type:
+        description: 'Release type (auto-detect based on commits, or override)'
+        required: false
+        type: choice
+        default: 'auto'
+        options:
+          - auto
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  create-release-pr:
+    name: Create Release PR
+    runs-on: ubuntu-latest
+    # Only allow running from develop branch
+    if: github.ref == 'refs/heads/develop'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install python-semantic-release
+        run: |
+          python -m pip install --upgrade pip
+          pip install python-semantic-release
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Determine next version
+        id: version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get the next version based on conventional commits
+          if [ "${{ github.event.inputs.release-type }}" == "auto" ]; then
+            NEXT_VERSION=$(semantic-release version --print 2>/dev/null || echo "")
+          else
+            # Manual override: patch, minor, or major
+            NEXT_VERSION=$(semantic-release version --print --${{ github.event.inputs.release-type }} 2>/dev/null || echo "")
+          fi
+
+          if [ -z "$NEXT_VERSION" ]; then
+            echo "❌ No new version to release. No relevant commits since last release."
+            echo "release_needed=false" >> $GITHUB_OUTPUT
+          else
+            echo "next_version=${NEXT_VERSION}" >> $GITHUB_OUTPUT
+            echo "release_needed=true" >> $GITHUB_OUTPUT
+            echo "✅ Next version will be: ${NEXT_VERSION}"
+          fi
+
+      - name: Create release branch and commit
+        if: steps.version.outputs.release_needed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=${{ steps.version.outputs.next_version }}
+          BRANCH="release/${VERSION}"
+
+          # Clean up any existing release branch
+          git branch -D "${BRANCH}" 2>/dev/null || true
+          if git ls-remote --heads origin "${BRANCH}" | grep -q "${BRANCH}"; then
+            git push origin --delete "${BRANCH}" 2>/dev/null || true
+          fi
+
+          # Create release branch from develop
+          git checkout -b "${BRANCH}"
+
+          # Run semantic-release to create version commit
+          # It will update pyproject.toml, CHANGELOG.md, etc.
+          if [ "${{ github.event.inputs.release-type }}" == "auto" ]; then
+            semantic-release version --commit --changelog --no-push --no-tag
+          else
+            semantic-release version --${{ github.event.inputs.release-type }} --commit --changelog --no-push --no-tag
+          fi
+
+          # Push the release branch
+          git push origin "${BRANCH}"
+
+          echo "✅ Created release branch: ${BRANCH}"
+
+      - name: Create Pull Request
+        if: steps.version.outputs.release_needed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=${{ steps.version.outputs.next_version }}
+          BRANCH="release/${VERSION}"
+
+          # Extract changelog for this version
+          CHANGELOG_SECTION=$(awk "/^## \[${VERSION}\]/,/^## \[/ {if (/^## \[${VERSION}\]/) p=1; if (p && /^## \[/ && !/^## \[${VERSION}\]/) exit; if (p) print}" CHANGELOG.md || echo "See CHANGELOG.md for details")
+
+          # Create PR from release branch to main
+          gh pr create \
+            --title "chore(release): ${VERSION}" \
+            --body "## 🚀 Release ${VERSION}
+
+          This PR was automatically created by the **Create Release** workflow.
+
+          ### 📋 Changes in this release
+
+          ${CHANGELOG_SECTION}
+
+          ### ✅ Checklist before merging
+
+          - [ ] Review the version bump (currently: **${VERSION}**)
+          - [ ] Review the CHANGELOG.md updates
+          - [ ] Verify all tests pass
+          - [ ] Confirm this is the right time to release
+
+          ### 🔄 What happens after merge
+
+          Once merged to \`main\`, the **Finalize Release** workflow will automatically:
+          1. Create a git tag: \`v${VERSION}\`
+          2. Create a GitHub release with release notes
+          3. Build and attach the macOS binary
+          4. Merge the release back to \`develop\` to keep branches in sync
+
+          ---
+          **Triggered by:** @${{ github.actor }}
+          **Release type:** ${{ github.event.inputs.release-type }}" \
+            --base main \
+            --head "${BRANCH}" \
+            --label "release"
+
+          echo "✅ Pull request created: release/${VERSION} → main"
+
+      - name: Summary
+        if: steps.version.outputs.release_needed == 'true'
+        run: |
+          echo "## ✅ Release PR Created" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ steps.version.outputs.next_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** release/${{ steps.version.outputs.next_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "👉 Review and merge the PR to complete the release" >> $GITHUB_STEP_SUMMARY
+
+      - name: No release needed
+        if: steps.version.outputs.release_needed == 'false'
+        run: |
+          echo "## ℹ️ No Release Needed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "No relevant commits found since the last release." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Make sure your commits follow the [Conventional Commits](https://www.conventionalcommits.org/) format:" >> $GITHUB_STEP_SUMMARY
+          echo "- \`feat:\` for new features (minor version bump)" >> $GITHUB_STEP_SUMMARY
+          echo "- \`fix:\` for bug fixes (patch version bump)" >> $GITHUB_STEP_SUMMARY
+          echo "- \`BREAKING CHANGE:\` or \`!\` for breaking changes (major version bump)" >> $GITHUB_STEP_SUMMARY
+          exit 1

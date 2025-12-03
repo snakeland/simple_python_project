@@ -1,6 +1,37 @@
 # Release Process
 
-This document explains how releases work in this project.
+This document explains how releases work in this project using a **Git Flow** strategy with manual release triggering.
+
+## Branch Strategy
+
+We use a simplified Git Flow model with two main branches:
+
+### Branches
+
+- **`develop`**: Main development branch
+  - All feature PRs merge here
+  - Active development happens here
+  - Protected (requires PR + passing CI)
+
+- **`main`**: Production/release-only branch
+  - Only release PRs merge here
+  - Represents what's in production
+  - Protected (requires PR + passing CI + reviews)
+
+- **`release/X.Y.Z`**: Temporary release preparation branches
+  - Created automatically by the release workflow
+  - Contains version bumps and changelog updates
+  - Gets merged to `main`, then merged back to `develop`
+
+### Workflow Diagram
+
+```
+develop ──┬──> feature branches ──> PR ──> develop
+          │
+          └──> (manual trigger) ──> release/X.Y.Z ──> PR ──> main
+                                                              │
+                                                              └──> auto-merge ──> develop
+```
 
 ## Versioning Strategy
 
@@ -10,51 +41,77 @@ We use **Semantic Versioning** (SemVer): `MAJOR.MINOR.PATCH`
 - **MINOR**: New features (backward compatible)
 - **PATCH**: Bug fixes, documentation, CI improvements
 
-## Automated Releases
+Version bumps are determined automatically by analyzing **conventional commits** since the last release.
 
-Releases are **semi-automated** using `python-semantic-release` based on conventional commits. The process creates a release PR that requires manual review and approval before the release is finalized.
+## Release Process
 
-### How It Works
+### Step 1: Develop Features
 
-The release process has two main stages:
+Work on the `develop` branch as usual:
 
-#### Stage 1: Release PR Creation (Automated)
-
-When you **commit with conventional format** to `main` branch:
 ```bash
-feat: add new operation     # Triggers MINOR version bump
-fix: correct calculation    # Triggers PATCH version bump
-docs: update README         # Triggers PATCH version bump
+# Create feature branch from develop
+git checkout develop
+git pull
+git checkout -b feature/my-feature
+
+# Make changes and commit
+git commit -m "feat: add new calculator operation"
+
+# Create PR to develop
+git push -u origin feature/my-feature
+# Open PR: feature/my-feature → develop
 ```
 
-The **Semantic Release workflow** automatically:
-- Analyzes commits since last release
-- Determines version bump (major/minor/patch)
-- Updates `version` in `pyproject.toml`
-- Updates `CHANGELOG.md`
-- Creates a release PR (e.g., `chore(release): 0.3.0`)
+### Step 2: Trigger Release (Manual)
 
-#### Stage 2: Release Finalization (Manual Review Required)
+When ready to release, trigger the **Create Release** workflow manually:
 
-1. **Review the release PR** created by the workflow:
-   - Verify the version bump is correct (check `pyproject.toml`)
-   - Review the CHANGELOG.md updates for accuracy
-   - Ensure all changes are properly categorized
-   - Check that breaking changes are clearly marked
+1. Go to GitHub Actions → "Create Release" workflow
+2. Click "Run workflow"
+3. Select branch: **`develop`** (required)
+4. Choose release type:
+   - **auto** (default): Analyzes commits to determine version bump
+   - **patch**: Force patch version bump (0.2.0 → 0.2.1)
+   - **minor**: Force minor version bump (0.2.0 → 0.3.0)
+   - **major**: Force major version bump (0.2.0 → 1.0.0)
 
-2. **Merge the release PR** to trigger finalization:
-   - The `finalize-release` job automatically runs
-   - Creates git tag (e.g., `v0.3.0`)
-   - Pushes tag to GitHub
-   - Creates GitHub release with changelog
+The workflow will:
+- Analyze commits since last release
+- Determine next version (based on conventional commits or your selection)
+- Create `release/X.Y.Z` branch from `develop`
+- Update `pyproject.toml` with new version
+- Update `CHANGELOG.md` with categorized changes
+- Create a PR: `release/X.Y.Z` → `main`
 
-3. **Build workflow** automatically:
-   - Builds macOS arm64 binary
-   - Attaches binary to the GitHub release
+### Step 3: Review Release PR
+
+Review the automatically created release PR:
+
+- ✅ Verify version bump is correct
+- ✅ Review CHANGELOG.md updates for accuracy
+- ✅ Ensure all changes are properly categorized
+- ✅ Check for breaking changes
+- ✅ Confirm CI passes
+
+### Step 4: Merge to Finalize Release
+
+When the release PR is approved and CI passes, **merge it to `main`**.
+
+The **Finalize Release** workflow will automatically:
+
+1. Create git tag (e.g., `v1.0.0`)
+2. Push tag to GitHub
+3. Create GitHub release with changelog
+4. Build macOS arm64 binary
+5. Attach binary to release
+6. **Merge `main` back to `develop`** to keep branches in sync
+
+That's it! The release is now live.
 
 ## Commit Message Format
 
-Use conventional commits format:
+Use **Conventional Commits** format for automatic version detection:
 
 ```
 <type>(<scope>): <description>
@@ -64,7 +121,7 @@ Use conventional commits format:
 [optional footer]
 ```
 
-### Types that trigger releases:
+### Commit Types and Version Bumps
 
 | Type       | Version Bump | Example                                    |
 |------------|--------------|-------------------------------------------|
@@ -75,8 +132,11 @@ Use conventional commits format:
 | `ci:`      | PATCH        | `ci: add windows build`                   |
 | `refactor:`| PATCH        | `refactor: simplify CLI parsing`          |
 | `test:`    | PATCH        | `test: add edge case tests`               |
+| `chore:`   | PATCH        | `chore: update dependencies`              |
+| `style:`   | PATCH        | `style: format code with ruff`            |
+| `build:`   | PATCH        | `build: update build process`             |
 
-### Breaking changes (MAJOR bump):
+### Breaking Changes (MAJOR bump)
 
 Add `BREAKING CHANGE:` in commit footer or `!` after type:
 
@@ -86,121 +146,157 @@ feat!: change CLI syntax to use flags
 BREAKING CHANGE: Operations now require --op flag instead of positional argument
 ```
 
-## Manual Release (Alternative)
+Or:
 
-If you prefer manual control, you can use the `release.yml` workflow:
+```
+refactor: redesign calculator API
 
-1. Update version in `pyproject.toml`
-2. Update `CHANGELOG.md`
-3. Commit changes
-4. Create and push tag:
-   ```bash
-   git tag v0.3.0
-   git push --tags
-   ```
-5. The `release.yml` workflow will create the GitHub release
-
-## Current Version Scheme
-
-- **0.x.x**: Pre-1.0 development phase (we are here)
-- **1.0.0**: First stable release (when CLI is stable and documented)
-- **1.x.x**: Post-1.0 following strict SemVer
+BREAKING CHANGE: Calculator class constructor signature changed
+```
 
 ## Examples
 
-### Adding a new feature
+### Scenario 1: New Feature Release
+
 ```bash
-git commit -m "feat: add power operation for exponentiation
+# On develop branch
+git commit -m "feat: add power operation
 
-Adds pow operation to calculator with CLI alias.
-Supports both integer and float exponents."
+Adds pow operation to calculator.
+Supports both integer and float exponents.
+Includes comprehensive tests."
 
-# This will trigger:
-# - Semantic Release workflow creates a PR titled "chore(release): 0.3.0"
-# - The PR contains:
-#   - Version bump: 0.2.0 → 0.3.0 in pyproject.toml
-#   - CHANGELOG update with "Added" section
-# - After PR is reviewed and merged:
-#   - GitHub release v0.3.0 is created
-#   - macOS binary is built and attached
+git push
+
+# Trigger release workflow from GitHub UI
+# Select: branch=develop, release-type=auto
+# Result: Creates release/0.3.0 → main PR
+# After merge: v0.3.0 released, changes merge back to develop
 ```
 
-### Fixing a bug
-```bash
-git commit -m "fix: prevent divide by zero crash in average
+### Scenario 2: Bug Fix Release
 
-Previously average([0, 0, 0]) would crash.
+```bash
+# On develop branch
+git commit -m "fix: prevent divide by zero in average
+
+Previously average([]) would crash.
 Now returns 0.0 as expected."
 
-# This will trigger:
-# - Semantic Release workflow creates a PR titled "chore(release): 0.2.1"
-# - The PR contains:
-#   - Version bump: 0.2.0 → 0.2.1 in pyproject.toml
-#   - CHANGELOG update with "Fixed" section
-# - After PR is reviewed and merged:
-#   - GitHub release v0.2.1 is created
-#   - macOS binary is built and attached
+git push
+
+# Trigger release workflow
+# Result: Creates release/0.2.1 → main PR (patch bump)
 ```
 
-### Documentation only (still creates patch release)
-```bash
-git commit -m "docs: add installation instructions to README"
-
-# This will trigger:
-# - Semantic Release workflow creates a PR titled "chore(release): 0.2.1"
-# - The PR contains:
-#   - Version bump: 0.2.0 → 0.2.1 in pyproject.toml
-#   - CHANGELOG update
-# - After PR is reviewed and merged:
-#   - GitHub release v0.2.1 is created
-#   - macOS binary is built and attached
-```
-
-## Skipping Releases
-
-To commit without triggering a release, use:
+### Scenario 3: Multiple Changes
 
 ```bash
-git commit -m "chore: update development notes
+# Multiple commits on develop
+git commit -m "feat: add logarithm operation"
+git commit -m "fix: improve error messages"
+git commit -m "docs: update API documentation"
+git push
 
-[skip ci]"
+# Trigger release workflow
+# Result: MINOR bump (0.2.0 → 0.3.0) because of "feat:"
+# CHANGELOG will include all three changes under appropriate sections
 ```
 
-Note: The following commit types **do** trigger patch releases in this project:
-- `chore:` - Maintenance tasks
-- `style:` - Code formatting (no logic changes)
-- `build:` - Build system changes
+### Scenario 4: Force Specific Version
 
-To avoid triggering a release for these commit types, add `[skip ci]` to your commit message.
+Sometimes you want to control the version bump manually:
+
+```bash
+# Trigger release workflow with release-type=major
+# Even if commits suggest minor/patch, this forces 1.0.0
+```
+
+## Current Version Scheme
+
+- **0.x.x**: Pre-1.0 development phase (current)
+- **1.0.0**: First stable release (when API/CLI is stable)
+- **1.x.x**: Post-1.0 following strict SemVer
+
 ## Troubleshooting
 
-### Release PR not created
-- Check that commit is on `main` branch
-- Verify commit message follows conventional format
-- Check GitHub Actions workflow run for errors
-- Ensure no previous release PR is already open
+### Workflow says "No release needed"
 
-### Release PR created but no release after merge
-- Check that the PR title starts with `chore(release):`
-- Verify the `finalize-release` job ran successfully
-- Check GitHub Actions workflow logs for errors
+The `develop` branch has no new releasable commits since the last release. Commits must use conventional commit format:
+
+```bash
+# ✅ Will be included in release
+git commit -m "feat: add new feature"
+git commit -m "fix: correct bug"
+
+# ❌ Won't trigger version bump (but should still use conventional format!)
+git commit -m "ci: update workflow"  # Patch bump
+git commit -m "chore: reorganize code"  # Patch bump
+```
+
+**All commits should follow conventional format**, even if they're just chores.
+
+### Release PR fails CI
+
+The release branch is created from `develop`, so if `develop` has failing tests, the release PR will also fail. Fix the issues on `develop` first, then re-trigger the release.
 
 ### Wrong version bump
-- Review the release PR before merging
-- Check that commit types are correct (`feat:` vs `fix:`)
-- For breaking changes, ensure `BREAKING CHANGE:` footer or `!` after type
-- Close the PR without merging and fix the original commits if needed
+
+**Option 1**: Close the release PR without merging, and re-trigger the workflow with a different `release-type` (patch/minor/major).
+
+**Option 2**: Manually edit `pyproject.toml` and `CHANGELOG.md` in the release PR before merging.
 
 ### Need to undo a release
+
 ```bash
-# Delete tag locally and remotely
+# 1. Delete the tag
 git tag -d v0.3.0
 git push --delete origin v0.3.0
 
-# Delete GitHub release manually in web UI
-# Revert the version commit
-git revert <commit-hash>
+# 2. Delete GitHub release in web UI
+
+# 3. Revert the merge commit on main
+git checkout main
+git revert -m 1 <merge-commit-hash>
+git push
+
+# 4. Update develop to match
+git checkout develop
+git merge main
+git push
 ```
+
+### Merge conflicts between main and develop
+
+This shouldn't happen often if you:
+- Always create releases from `develop`
+- Let the workflow merge main back to develop automatically
+
+If it does happen:
+```bash
+git checkout develop
+git pull
+git merge main
+# Resolve conflicts
+git commit
+git push
+```
+
+## Branch Protection Setup
+
+Recommended settings:
+
+### `main` branch:
+- ✅ Require pull request before merging
+- ✅ Require approvals: 1
+- ✅ Require status checks to pass: `lint`, `test (3.10)`, `test (3.11)`, `test (3.12)`
+- ✅ Require conversation resolution before merging
+- ❌ Do NOT allow bypassing (keep releases manual)
+
+### `develop` branch:
+- ✅ Require pull request before merging
+- ✅ Require status checks to pass: `lint`, `test (3.10)`, `test (3.11)`, `test (3.12)`
+- ✅ Require conversation resolution before merging
 
 ## See Also
 
@@ -208,3 +304,4 @@ git revert <commit-hash>
 - [Semantic Versioning](https://semver.org/)
 - [Conventional Commits](https://www.conventionalcommits.org/)
 - [python-semantic-release docs](https://python-semantic-release.readthedocs.io/)
+- [Git Flow](https://nvie.com/posts/a-successful-git-branching-model/)
