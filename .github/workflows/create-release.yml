@@ -140,8 +140,10 @@ jobs:
           **Triggered by:** @${{ github.actor }}
           **Release type:** ${{ github.event.inputs.release-type }}" \
             --base main \
-            --head "${BRANCH}" \
-            --label "release"
+            --head "${BRANCH}"
+
+          # Try to add label if it exists (non-fatal)
+          gh pr edit "${BRANCH}" --add-label "release" 2>/dev/null || echo "ℹ️  Note: 'release' label not found (skipped)"
 
           echo "✅ Pull request created: release/${VERSION} → main"
 
