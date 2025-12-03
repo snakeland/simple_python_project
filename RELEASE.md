@@ -180,7 +180,7 @@ git push
 # On develop branch
 git commit -m "fix: prevent divide by zero in average
 
-Previously average([0, 0, 0]) would crash.
+Previously average([]) would crash.
 Now returns 0.0 as expected."
 
 git push
