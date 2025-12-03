@@ -162,6 +162,9 @@ jobs:
           VERSION=${{ steps.version.outputs.next_version }}
           BRANCH="release/${VERSION}"
 
+          # Checkout release branch to access the updated CHANGELOG
+          git checkout "${BRANCH}"
+
           # Extract changelog for this version
           CHANGELOG_SECTION=$(awk "/^## \[${VERSION}\]/,/^## \[/ {if (/^## \[${VERSION}\]/) p=1; if (p && /^## \[/ && !/^## \[${VERSION}\]/) exit; if (p) print}" CHANGELOG.md || echo "See CHANGELOG.md for details")
 
