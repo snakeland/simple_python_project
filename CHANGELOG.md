@@ -6,10 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+## [1.0.0] - 2025-12-03
+
 
 ### Added
 - Help flag support (`--help` and `-h`) for CLI
 - Documentation reorganization for better navigation
+
+## [1.0.0] - 2025-12-03
 
 ## [0.2.0] - 2025-11-30
 
