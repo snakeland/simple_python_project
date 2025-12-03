@@ -86,13 +86,68 @@ jobs:
           # Create release branch from develop
           git checkout -b "${BRANCH}"
 
-          # Run semantic-release to create version commit
-          # It will update pyproject.toml, CHANGELOG.md, etc.
-          if [ "${{ github.event.inputs.release-type }}" == "auto" ]; then
-            semantic-release version --commit --changelog --no-push --no-tag
+          # Update version in pyproject.toml
+          NEW_VERSION="${VERSION}"
+          sed -i "s/^version = .*/version = \"${NEW_VERSION}\"/" pyproject.toml
+
+          # Generate changelog from git commits since last tag
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$LAST_TAG" ]; then
+            COMMIT_RANGE="HEAD"
           else
-            semantic-release version --${{ github.event.inputs.release-type }} --commit --changelog --no-push --no-tag
+            COMMIT_RANGE="${LAST_TAG}..HEAD"
           fi
+
+          # Get commits grouped by type
+          FEATURES=$(git log $COMMIT_RANGE --pretty=format:"- %s" --grep="^feat" || echo "")
+          FIXES=$(git log $COMMIT_RANGE --pretty=format:"- %s" --grep="^fix" || echo "")
+          DOCS=$(git log $COMMIT_RANGE --pretty=format:"- %s" --grep="^docs" || echo "")
+          CHORES=$(git log $COMMIT_RANGE --pretty=format:"- %s" --grep="^chore" || echo "")
+          CI=$(git log $COMMIT_RANGE --pretty=format:"- %s" --grep="^ci" || echo "")
+
+          # Create new changelog entry
+          TODAY=$(date +%Y-%m-%d)
+          NEW_ENTRY="## [${VERSION}] - ${TODAY}"
+
+          if [ -n "$FEATURES" ]; then
+            NEW_ENTRY="${NEW_ENTRY}\n\n### Added\n${FEATURES}"
+          fi
+          if [ -n "$FIXES" ]; then
+            NEW_ENTRY="${NEW_ENTRY}\n\n### Fixed\n${FIXES}"
+          fi
+          if [ -n "$DOCS" ]; then
+            NEW_ENTRY="${NEW_ENTRY}\n\n### Documentation\n${DOCS}"
+          fi
+          if [ -n "$CI" ]; then
+            NEW_ENTRY="${NEW_ENTRY}\n\n### CI/CD\n${CI}"
+          fi
+          if [ -n "$CHORES" ]; then
+            NEW_ENTRY="${NEW_ENTRY}\n\n### Changed\n${CHORES}"
+          fi
+
+          # Replace [Unreleased] content with new version section
+          # Keep [Unreleased] header but empty it, add new version section below
+          awk -v entry="$NEW_ENTRY" '
+            /^## \[Unreleased\]/ {
+              print "## [Unreleased]"
+              print ""
+              print entry
+              print ""
+              # Skip until next version section
+              in_unreleased=1
+              next
+            }
+            in_unreleased && /^## \[/ {
+              in_unreleased=0
+            }
+            !in_unreleased {
+              print
+            }
+          ' CHANGELOG.md > CHANGELOG.md.tmp && mv CHANGELOG.md.tmp CHANGELOG.md
+
+          # Manually commit the changes
+          git add -A
+          git commit -m "chore(release): ${VERSION}"
 
           # Push the release branch
           git push origin "${BRANCH}"
@@ -107,8 +162,11 @@ jobs:
           VERSION=${{ steps.version.outputs.next_version }}
           BRANCH="release/${VERSION}"
 
-          # Extract changelog for this version
-          CHANGELOG_SECTION=$(awk "/^## \[${VERSION}\]/,/^## \[/ {if (/^## \[${VERSION}\]/) p=1; if (p && /^## \[/ && !/^## \[${VERSION}\]/) exit; if (p) print}" CHANGELOG.md || echo "See CHANGELOG.md for details")
+          # Checkout release branch to access the updated CHANGELOG
+          git checkout "${BRANCH}"
+
+          # Extract changelog for this version using sed
+          CHANGELOG_SECTION=$(sed -n "/^## \\[${VERSION}\\]/,/^## \\[/p" CHANGELOG.md | sed '$d' || echo "See CHANGELOG.md for details")
 
           # Create PR from release branch to main
           PR_URL=$(gh pr create \

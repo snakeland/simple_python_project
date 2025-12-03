@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "simple-calc"
-version = "0.2.0"
+version = "1.0.0"
 description = "Tiny arithmetic package for demos and tests"
 readme = "README.md"
 license = {text = "MIT"}
@@ -60,12 +60,19 @@ upload_to_vcs_release = true
 build_command = "pip install build && python -m build"
 commit_message = "chore(release): {version}"
 
+[tool.semantic_release.version]
+major_on_zero = false  # Stay in 0.x versions, don't auto-bump to 1.0.0
+
 [tool.semantic_release.branches.main]
 match = "main"
 prerelease = false
 
 [tool.semantic_release.branches.develop]
 match = "develop"
+prerelease = false
+
+[tool.semantic_release.branches.release]
+match = "release/*"
 prerelease = false
 
 [tool.semantic_release.changelog]
