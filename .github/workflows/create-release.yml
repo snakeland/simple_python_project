@@ -99,11 +99,11 @@ jobs:
           fi
 
           # Get commits grouped by type
-          FEATURES=$(git log $COMMIT_RANGE --pretty=format:"- %s" --grep="^feat" --grep="^feat(" --regexp-ignore-case --perl-regexp || echo "")
-          FIXES=$(git log $COMMIT_RANGE --pretty=format:"- %s" --grep="^fix" --grep="^fix(" --regexp-ignore-case --perl-regexp || echo "")
-          DOCS=$(git log $COMMIT_RANGE --pretty=format:"- %s" --grep="^docs" --grep="^docs(" --regexp-ignore-case --perl-regexp || echo "")
-          CHORES=$(git log $COMMIT_RANGE --pretty=format:"- %s" --grep="^chore" --grep="^chore(" --regexp-ignore-case --perl-regexp || echo "")
-          CI=$(git log $COMMIT_RANGE --pretty=format:"- %s" --grep="^ci" --grep="^ci(" --regexp-ignore-case --perl-regexp || echo "")
+          FEATURES=$(git log $COMMIT_RANGE --pretty=format:"- %s" --grep="^feat" || echo "")
+          FIXES=$(git log $COMMIT_RANGE --pretty=format:"- %s" --grep="^fix" || echo "")
+          DOCS=$(git log $COMMIT_RANGE --pretty=format:"- %s" --grep="^docs" || echo "")
+          CHORES=$(git log $COMMIT_RANGE --pretty=format:"- %s" --grep="^chore" || echo "")
+          CI=$(git log $COMMIT_RANGE --pretty=format:"- %s" --grep="^ci" || echo "")
 
           # Create new changelog entry
           TODAY=$(date +%Y-%m-%d)
