@@ -165,8 +165,8 @@ jobs:
           # Checkout release branch to access the updated CHANGELOG
           git checkout "${BRANCH}"
 
-          # Extract changelog for this version
-          CHANGELOG_SECTION=$(awk "/^## \[${VERSION}\]/,/^## \[/ {if (/^## \[${VERSION}\]/) p=1; if (p && /^## \[/ && !/^## \[${VERSION}\]/) exit; if (p) print}" CHANGELOG.md || echo "See CHANGELOG.md for details")
+          # Extract changelog for this version using sed
+          CHANGELOG_SECTION=$(sed -n "/^## \\[${VERSION}\\]/,/^## \\[/p" CHANGELOG.md | sed '$d' || echo "See CHANGELOG.md for details")
 
           # Create PR from release branch to main
           PR_URL=$(gh pr create \
