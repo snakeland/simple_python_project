@@ -90,8 +90,48 @@ jobs:
           NEW_VERSION="${VERSION}"
           sed -i "s/^version = .*/version = \"${NEW_VERSION}\"/" pyproject.toml
 
-          # Generate changelog using semantic-release
-          semantic-release changelog
+          # Generate changelog from git commits since last tag
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$LAST_TAG" ]; then
+            COMMIT_RANGE="HEAD"
+          else
+            COMMIT_RANGE="${LAST_TAG}..HEAD"
+          fi
+
+          # Get commits grouped by type
+          FEATURES=$(git log $COMMIT_RANGE --pretty=format:"- %s" --grep="^feat" --grep="^feat(" --regexp-ignore-case --perl-regexp || echo "")
+          FIXES=$(git log $COMMIT_RANGE --pretty=format:"- %s" --grep="^fix" --grep="^fix(" --regexp-ignore-case --perl-regexp || echo "")
+          DOCS=$(git log $COMMIT_RANGE --pretty=format:"- %s" --grep="^docs" --grep="^docs(" --regexp-ignore-case --perl-regexp || echo "")
+          CHORES=$(git log $COMMIT_RANGE --pretty=format:"- %s" --grep="^chore" --grep="^chore(" --regexp-ignore-case --perl-regexp || echo "")
+          CI=$(git log $COMMIT_RANGE --pretty=format:"- %s" --grep="^ci" --grep="^ci(" --regexp-ignore-case --perl-regexp || echo "")
+
+          # Create new changelog entry
+          TODAY=$(date +%Y-%m-%d)
+          NEW_ENTRY="## [${VERSION}] - ${TODAY}\n"
+
+          if [ -n "$FEATURES" ]; then
+            NEW_ENTRY="${NEW_ENTRY}\n### Added\n${FEATURES}\n"
+          fi
+          if [ -n "$FIXES" ]; then
+            NEW_ENTRY="${NEW_ENTRY}\n### Fixed\n${FIXES}\n"
+          fi
+          if [ -n "$DOCS" ]; then
+            NEW_ENTRY="${NEW_ENTRY}\n### Documentation\n${DOCS}\n"
+          fi
+          if [ -n "$CI" ]; then
+            NEW_ENTRY="${NEW_ENTRY}\n### CI/CD\n${CI}\n"
+          fi
+          if [ -n "$CHORES" ]; then
+            NEW_ENTRY="${NEW_ENTRY}\n### Changed\n${CHORES}\n"
+          fi
+
+          # Insert new entry after [Unreleased] section
+          awk -v entry="$NEW_ENTRY" '
+            /^## \[Unreleased\]/ {print; in_unreleased=1; next}
+            in_unreleased && /^## \[/ {print entry; in_unreleased=0}
+            in_unreleased && /^$/ && !printed {print entry; printed=1}
+            {print}
+          ' CHANGELOG.md > CHANGELOG.md.tmp && mv CHANGELOG.md.tmp CHANGELOG.md
 
           # Manually commit the changes
           git add -A
