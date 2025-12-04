@@ -153,19 +153,15 @@ jobs:
             }
           ' CHANGELOG.md > CHANGELOG.md.tmp && mv CHANGELOG.md.tmp CHANGELOG.md
 
-          # Manually commit the changes
+          # Commit changes - let create-pull-request action handle the push
           git add -A
           git commit -m "chore(release): ${VERSION}"
 
-          # Push the release branch
-          git push origin "${BRANCH}"
-
           echo "✅ Created release branch: ${BRANCH}"
 
-      - name: Create Pull Request
+      - name: Extract changelog for PR body
         if: steps.version.outputs.release_needed == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: changelog
         run: |
           VERSION=${{ steps.version.outputs.next_version }}
           BRANCH="release/${VERSION}"
@@ -176,63 +172,58 @@ jobs:
           # Extract changelog for this version using sed
           CHANGELOG_SECTION=$(sed -n "/^## \\[${VERSION}\\]/,/^## \\[/p" CHANGELOG.md | sed '$d' || echo "See CHANGELOG.md for details")
 
-          # Create PR from release branch to main
-          PR_URL=$(gh pr create \
-            --title "chore(release): ${VERSION}" \
-            --body "## 🚀 Release ${VERSION}
+          # Save to output using heredoc to preserve formatting
+          echo "section<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG_SECTION" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
-          This PR was automatically created by the **Create Release** workflow.
-
-          ### 📋 Changes in this release
-
-          ${CHANGELOG_SECTION}
-
-          ### ✅ Checklist before merging
-
-          - [ ] Review the version bump (currently: **${VERSION}**)
-          - [ ] Review the CHANGELOG.md updates
-          - [ ] Verify all tests pass
-          - [ ] Confirm this is the right time to release
-
-          ### 🔄 What happens after merge
-
-          Once merged to \`main\`, the **Finalize Release** workflow will automatically:
-          1. Create a git tag: \`v${VERSION}\`
-          2. Create a GitHub release with release notes
-          3. Build and attach the macOS binary
-          4. Merge the release back to \`develop\` to keep branches in sync
-
-          ---
-          **Triggered by:** @${{ github.actor }}
-          **Release type:** ${{ github.event.inputs.release-type }}" \
-            --base main \
-            --head "${BRANCH}")
-
-          # Extract PR number and add label
-          PR_NUMBER=$(echo "$PR_URL" | grep -oE '[0-9]+$')
-          gh pr edit "$PR_NUMBER" \
-            --add-label "release" 2>/dev/null || echo "ℹ️  Note: 'release' label not found (skipped)"
-
-          echo "✅ Pull request created: release/${VERSION} → main"
-          echo "✅ PR title set to: chore(release): ${VERSION}"
-          echo "✅ Repository squash merge enabled - commit will trigger finalize workflow"
-
-      - name: Trigger CI checks
+      - name: Push branch and Create Pull Request
         if: steps.version.outputs.release_needed == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: peter-evans/create-pull-request@v7
+        id: cpr
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: release/${{ steps.version.outputs.next_version }}
+          base: main
+          push-to-fork: false
+          title: "chore(release): ${{ steps.version.outputs.next_version }}"
+          body: |
+            ## 🚀 Release ${{ steps.version.outputs.next_version }}
+
+            This PR was automatically created by the **Create Release** workflow.
+
+            ### 📋 Changes in this release
+
+            ${{ steps.changelog.outputs.section }}
+
+            ### ✅ Checklist before merging
+
+            - [ ] Review the version bump (currently: **${{ steps.version.outputs.next_version }}**)
+            - [ ] Review the CHANGELOG.md updates
+            - [ ] Verify all tests pass
+            - [ ] Confirm this is the right time to release
+
+            ### 🔄 What happens after merge
+
+            Once merged to `main`, the **Finalize Release** workflow will automatically:
+            1. Create a git tag: `v${{ steps.version.outputs.next_version }}`
+            2. Create a GitHub release with release notes
+            3. Build and attach the macOS binary
+            4. Merge the release back to `develop` to keep branches in sync
+
+            ---
+            **Triggered by:** @${{ github.actor }}
+            **Release type:** ${{ github.event.inputs.release-type }}
+          labels: release
+          commit-message: "chore(release): ${{ steps.version.outputs.next_version }}"
+
+      - name: PR Summary
+        if: steps.version.outputs.release_needed == 'true' && steps.cpr.outputs.pull-request-number
         run: |
-          VERSION=${{ steps.version.outputs.next_version }}
-          BRANCH="release/${VERSION}"
-
-          # Push an empty commit to trigger CI on the release branch
-          # (GitHub doesn't auto-trigger workflows on bot-created PRs)
-          # CI workflow now listens to push events on release/* branches
-          git checkout "${BRANCH}"
-          git commit --allow-empty -m "ci: trigger CI checks"
-          git push origin "${BRANCH}"
-
-          echo "✅ CI checks triggered on release PR"
+          echo "✅ Pull request #${{ steps.cpr.outputs.pull-request-number }} created"
+          echo "✅ URL: ${{ steps.cpr.outputs.pull-request-url }}"
+          echo "✅ Branch: release/${{ steps.version.outputs.next_version }} → main"
+          echo "✅ CI checks will trigger automatically"
 
       - name: Summary
         if: steps.version.outputs.release_needed == 'true'
