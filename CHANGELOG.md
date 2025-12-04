@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2025-12-04
+
+### Fixed
+- fix: let create-pull-request action handle branch creation and commit
+- fix: remove push-to-fork parameter
+- fix: use peter-evans/create-pull-request to auto-trigger CI on release PRs
+- fix: trigger CI on release branches via push event instead of workflow_dispatch
+- fix: trigger CI using workflow_dispatch instead of empty commit
+- fix: use last merge-back commit for changelog generation in create-release workflow
+- fix: improve preview-release to show only commits since last merge-back
+
 ## [1.1.0] - 2025-12-03
 
 ### Added
