@@ -185,7 +185,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: release/${{ steps.version.outputs.next_version }}
           base: main
-          push-to-fork: false
           title: "chore(release): ${{ steps.version.outputs.next_version }}"
           body: |
             ## 🚀 Release ${{ steps.version.outputs.next_version }}
