@@ -225,9 +225,12 @@ jobs:
           VERSION=${{ steps.version.outputs.next_version }}
           BRANCH="release/${VERSION}"
 
-          # Trigger CI workflow on the release branch using GitHub API
+          # Push an empty commit to trigger CI on the release branch
           # (GitHub doesn't auto-trigger workflows on bot-created PRs)
-          gh workflow run ci.yml --ref "${BRANCH}"
+          # CI workflow now listens to push events on release/* branches
+          git checkout "${BRANCH}"
+          git commit --allow-empty -m "ci: trigger CI checks"
+          git push origin "${BRANCH}"
 
           echo "✅ CI checks triggered on release PR"
 
