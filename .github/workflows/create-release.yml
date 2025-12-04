@@ -90,20 +90,28 @@ jobs:
           NEW_VERSION="${VERSION}"
           sed -i "s/^version = .*/version = \"${NEW_VERSION}\"/" pyproject.toml
 
-          # Generate changelog from git commits since last tag
-          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          if [ -z "$LAST_TAG" ]; then
-            COMMIT_RANGE="HEAD"
+          # Generate changelog from git commits since last merge-back
+          # This handles squash merge workflow correctly by finding the last
+          # "chore: merge release" commit and showing only commits after that
+          LAST_MERGE=$(git log --oneline --grep="^chore: merge release" -1 --format="%H" 2>/dev/null || echo "")
+          if [ -z "$LAST_MERGE" ]; then
+            # Fallback to tag-based range if no merge-back found
+            LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+            if [ -z "$LAST_TAG" ]; then
+              COMMIT_RANGE="HEAD"
+            else
+              COMMIT_RANGE="${LAST_TAG}..HEAD"
+            fi
           else
-            COMMIT_RANGE="${LAST_TAG}..HEAD"
+            COMMIT_RANGE="${LAST_MERGE}..HEAD"
           fi
 
-          # Get commits grouped by type
-          FEATURES=$(git log $COMMIT_RANGE --pretty=format:"- %s" --grep="^feat" || echo "")
-          FIXES=$(git log $COMMIT_RANGE --pretty=format:"- %s" --grep="^fix" || echo "")
-          DOCS=$(git log $COMMIT_RANGE --pretty=format:"- %s" --grep="^docs" || echo "")
-          CHORES=$(git log $COMMIT_RANGE --pretty=format:"- %s" --grep="^chore" || echo "")
-          CI=$(git log $COMMIT_RANGE --pretty=format:"- %s" --grep="^ci" || echo "")
+          # Get commits grouped by type (excluding merge-back commits themselves)
+          FEATURES=$(git log $COMMIT_RANGE --pretty=format:"- %s" --grep="^feat" | grep -v "^- chore: merge release" || echo "")
+          FIXES=$(git log $COMMIT_RANGE --pretty=format:"- %s" --grep="^fix" | grep -v "^- chore: merge release" || echo "")
+          DOCS=$(git log $COMMIT_RANGE --pretty=format:"- %s" --grep="^docs" | grep -v "^- chore: merge release" || echo "")
+          CHORES=$(git log $COMMIT_RANGE --pretty=format:"- %s" --grep="^chore" | grep -v "^- chore: merge release" || echo "")
+          CI=$(git log $COMMIT_RANGE --pretty=format:"- %s" --grep="^ci" | grep -v "^- chore: merge release" || echo "")
 
           # Create new changelog entry
           TODAY=$(date +%Y-%m-%d)
