@@ -35,7 +35,7 @@ jobs:
           test $(./dist/run-calc add 10 20) -eq 30
 
       - name: Upload macOS arm64 binary
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: run-calc-macos-arm64
           path: dist/run-calc
